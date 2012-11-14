@@ -9,6 +9,19 @@ Q_OBJECT
 public:
     simulatoriPavimenti();
     virtual ~simulatoriPavimenti();
+    
+public slots:
+    void open();
+
+
+private:
+    void createActions();
+    void createMenus();
+
+    QMenu *fileMenu;
+    QAction *openAct;
+    QAction *exitAct;
+
 };
 
 #endif // simulatoriPavimenti_H
