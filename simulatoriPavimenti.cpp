@@ -22,6 +22,7 @@ simulatoriPavimenti::simulatoriPavimenti()
 //     menuBar()->addMenu( "File" )->addAction( a );
     this->createActions();
     this->createMenus();
+//     this->setMinimumSize(200,200);
 }
 
 simulatoriPavimenti::~simulatoriPavimenti()
@@ -57,7 +58,6 @@ void simulatoriPavimenti::createMenus()
     fileMenu->addAction(exitAct);
 }
 
-bool parse(QFile &xmlFile);
 void simulatoriPavimenti::open()
 {
     QString fileName =
@@ -79,7 +79,19 @@ void simulatoriPavimenti::open()
     std::cout<<"file scelto: "<<fileName.toStdString()<<std::endl;
     
     MapReader mapreader(file);
+    connect(&mapreader,SIGNAL(finished(Map*)),this,SLOT(getMap(Map*)));
+    mapreader.parse();
+   
 
 }
+
+void simulatoriPavimenti::getMap(Map* map)
+{
+    this->map = map;
+    this->map->setMinimumSize(100,100);
+    this->setCentralWidget(map);
+//     this->map->resize(400,400); //TODO make this work (preferred size style)
+}
+
  
 // #include "simulatoriPavimenti.moc"

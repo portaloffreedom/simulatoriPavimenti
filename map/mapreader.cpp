@@ -26,24 +26,32 @@ MapReader::MapReader(QFile &xmlFile)
     this->xmlFile = &xmlFile;
     map = new Map();
     
-    connect(this,SIGNAL(beginBorder()),map,SLOT(beginBorder()));
-    connect(this,SIGNAL(addBorderPoint(QPointF)),map,SLOT(addBorderPoint(QPointF)));
-    connect(this,SIGNAL(closeBorder()),map,SLOT(closeBorder()));
+    connect(this,SIGNAL(beginBorder(QString,QString))  ,map,SLOT(beginBorder(QString,QString))  );
+    connect(this,SIGNAL(addBorderPolygon())            ,map,SLOT(addBorderPolygon())            );
+    connect(this,SIGNAL(addBorderPolygonPoint(QPointF)),map,SLOT(addBorderPolygonPoint(QPointF)));
+    connect(this,SIGNAL(addBorderCircle(QPointF,qreal)),map,SLOT(addBorderCircle(QPointF,qreal)));
+    connect(this,SIGNAL(closeBorder())                 ,map,SLOT(closeBorder())                 );
     
-    connect(this,SIGNAL(beginEntrance()),map,SLOT(beginEntrance()));
-    connect(this,SIGNAL(addEntrancePoint(QPointF)),map,SLOT(addEntrancePoint(QPointF)));
-    connect(this,SIGNAL(closeEntrace()),map,SLOT(closeEntrace()));
+    connect(this,SIGNAL(beginEntrance(QString,QString))  ,map,SLOT(beginEntrance(QString,QString))  );
+    connect(this,SIGNAL(addEntrancePolygon())            ,map,SLOT(addEntrancePolygon())            );
+    connect(this,SIGNAL(addEntrancePolygonPoint(QPointF)),map,SLOT(addEntrancePolygonPoint(QPointF)));
+    connect(this,SIGNAL(addEntranceCircle(QPointF,qreal)),map,SLOT(addEntranceCircle(QPointF,qreal)));
+    connect(this,SIGNAL(closeEntrace())                  ,map,SLOT(closeEntrace())                  );
     
-    connect(this,SIGNAL(beginExit()),map,SLOT(beginExit()));
-    connect(this,SIGNAL(addExitPoint(QPointF)),map,SLOT(addExitPoint(QPointF)));
-    connect(this,SIGNAL(closeExit()),map,SLOT(closeExit()));
+    connect(this,SIGNAL(beginExit(QString,QString))  ,map,SLOT(beginExit(QString,QString))  );
+    connect(this,SIGNAL(addExitPolygon())            ,map,SLOT(addExitPolygon())            );
+    connect(this,SIGNAL(addExitPolygonPoint(QPointF)),map,SLOT(addExitPolygonPoint(QPointF)));
+    connect(this,SIGNAL(addExitCircle(QPointF,qreal)),map,SLOT(addExitCircle(QPointF,qreal)));
+    connect(this,SIGNAL(closeExit())                 ,map,SLOT(closeExit())                 );
     
-    connect(this,SIGNAL(beginObstacle()),map,SLOT(beginObstacle()));
-    connect(this,SIGNAL(addObstaclePoint(QPointF)),map,SLOT(addObstaclePoint(QPointF)));
-    connect(this,SIGNAL(closeObstacle()),map,SLOT(closeObstacle()));
+    connect(this,SIGNAL(beginObstacle(QString,QString))  ,map,SLOT(beginObstacle(QString,QString))  );
+    connect(this,SIGNAL(addObstaclePolygon())            ,map,SLOT(addObstaclePolygon())            );
+    connect(this,SIGNAL(addObstaclePolygonPoint(QPointF)),map,SLOT(addObstaclePolygonPoint(QPointF)));
+    connect(this,SIGNAL(addObstacleCircle(QPointF,qreal)),map,SLOT(addObstacleCircle(QPointF,qreal)));
+    connect(this,SIGNAL(closeObstacle())                 ,map,SLOT(closeObstacle())                 );
     
     
-    parseStatus = this->parse();
+//     parseStatus = this->parse();
 }
 
 MapReader::~MapReader()
@@ -79,19 +87,27 @@ bool MapReader::parse()
 	    case QXmlStreamReader::StartElement :
 		std::cout<<xml.name().toString().toStdString()<<std::endl;
 		if (xml.name().compare("border") == 0) {
-		    parsePolygon(xml,&MapReader::beginBorder,&MapReader::addBorderPoint,&MapReader::closeBorder);
+		    emit beginBorder("","b1");
+		    parsePolygon(xml,&MapReader::addBorderPolygon,&MapReader::addBorderPolygonPoint);
+		    emit closeBorder();
 		    break;
 		}
 		if (xml.name().compare("entrance") == 0) {
-		    parsePolygon(xml,&MapReader::beginEntrance,&MapReader::addEntrancePoint,&MapReader::closeEntrace);
+		    emit beginEntrance("","en1");
+		    parsePolygon(xml,&MapReader::addEntrancePolygon,&MapReader::addEntrancePolygonPoint);
+		    emit closeEntrace();
 		    break;
 		}
 		if (xml.name().compare("exit") == 0) {
-		    parsePolygon(xml,&MapReader::beginExit,&MapReader::addExitPoint,&MapReader::closeExit);
+		    emit beginExit("","ex1");
+		    parsePolygon(xml,&MapReader::addExitPolygon,&MapReader::addExitPolygonPoint);
+		    emit closeExit();
 		    break;
 		}
 		if (xml.name().compare("obstacle") == 0) {
-		    parsePolygon(xml,&MapReader::beginObstacle,&MapReader::addObstaclePoint,&MapReader::closeObstacle);
+		    emit beginObstacle("","o1");
+		    parsePolygon(xml,&MapReader::addObstaclePolygon,&MapReader::addObstaclePolygonPoint);
+		    emit closeObstacle();
 		    break;
 		}
 		break;
@@ -113,6 +129,7 @@ bool MapReader::parse()
 		
 	    case QXmlStreamReader::EndDocument : 
 		std::cout<<"fine del documento"<<std::endl;
+		emit finished(this->map);
 		return true;
 		
 	    case QXmlStreamReader::DTD : 
@@ -137,12 +154,9 @@ bool MapReader::parse()
     return false;
 }
 
-// bool MapReader::parsePolygon(QXmlStreamReader* xml, function void* () begin, function void* () addPoint, function void* () close)
-// bool parsePolygon(QXmlStreamReader &xml, void (MapReader::*)(), void (MapReader::*)(), void (MapReader::*close)())
-// bool MapReader::parsePolygon(QXmlStreamReader &xml, void* begin() , void* addPoint(QPointF), void* close())
-bool MapReader::parsePolygon(QXmlStreamReader &xml, void (MapReader::*begin)(), void (MapReader::*addPoint)(QPointF), void (MapReader::*close)())
+bool MapReader::parsePolygon(QXmlStreamReader &xml, void (MapReader::*addPolygon)(), void (MapReader::*addPolygonPoint)(QPointF))
 {
-    emit (this->*begin)();
+    emit (this->*addPolygon)();
     QStringRef polygonType = xml.name();
     QString errorString("formattazione del poligono ");
     errorString.append(polygonType);
@@ -170,7 +184,7 @@ bool MapReader::parsePolygon(QXmlStreamReader &xml, void (MapReader::*begin)(), 
 	float x = attributes.value("x").toString().toFloat();
 	float y = attributes.value("y").toString().toFloat();
 	QPointF point(x,y);
-	emit (this->*addPoint)(point);
+	emit (this->*addPolygonPoint)(point);
 	std::cout<<"Aggiunto un punto a "<<polygonType.toString().toStdString()<<": "<<point.x()<<","<<point.y()<<std::endl;
 	
 	xml.readNext();
@@ -186,7 +200,6 @@ bool MapReader::parsePolygon(QXmlStreamReader &xml, void (MapReader::*begin)(), 
 	emit error(errorString.append("numero di punti non sufficenti per formare un poligono"));
 	return false; 
     }
-    emit  (this->*close)();
     return true;
 }
 

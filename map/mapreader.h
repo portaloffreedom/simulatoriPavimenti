@@ -33,31 +33,39 @@ public:
     MapReader(QFile& xmlFile);
     virtual ~MapReader();
     bool getMap();
+    bool parse();
     
 signals:
     void error(QString);
     void finished(Map*);
     
     
-    void beginBorder();
-    void addBorderPoint(QPointF point);
+    void beginBorder(const QString description, const QString id);
+    void addBorderPolygon();
+    void addBorderPolygonPoint(QPointF point);
+    void addBorderCircle(QPointF center, qreal radius);
     void closeBorder();
     
-    void beginEntrance();
-    void addEntrancePoint(QPointF point);
+    void beginEntrance(const QString description, const QString id);
+    void addEntrancePolygon();
+    void addEntrancePolygonPoint(QPointF point);
+    void addEntranceCircle(QPointF center, qreal radius);
     void closeEntrace();
     
-    void beginExit();
-    void addExitPoint(QPointF point);
+    void beginExit(const QString description, const QString id);
+    void addExitPolygon();
+    void addExitPolygonPoint(QPointF point);
+    void addExitCircle(QPointF center, qreal radius);
     void closeExit();
     
-    void beginObstacle();
-    void addObstaclePoint(QPointF point);
+    void beginObstacle(const QString description, const QString id);
+    void addObstaclePolygon();
+    void addObstaclePolygonPoint(QPointF point);
+    void addObstacleCircle(QPointF center, qreal radius);
     void closeObstacle();
     
 private:
-    bool parse();
-    bool parsePolygon(QXmlStreamReader &xml, void (MapReader::*)(), void (MapReader::*)(QPointF), void (MapReader::*)());
+    bool parsePolygon(QXmlStreamReader &xml, void (MapReader::*addPolygon)(), void (MapReader::*addPolygonPoint)(QPointF));
     
     Map *map;
     QFile *xmlFile;

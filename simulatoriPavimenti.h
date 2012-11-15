@@ -2,6 +2,7 @@
 #define simulatoriPavimenti_H
 
 #include <QtGui/QMainWindow>
+#include "map/map.h"
 
 class simulatoriPavimenti : public QMainWindow
 {
@@ -12,6 +13,7 @@ public:
     
 public slots:
     void open();
+    void getMap(Map* );
 
 
 private:
@@ -21,6 +23,8 @@ private:
     QMenu *fileMenu;
     QAction *openAct;
     QAction *exitAct;
+    
+    QWidget *map;
 
 };
 
