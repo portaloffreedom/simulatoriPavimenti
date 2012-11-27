@@ -23,6 +23,8 @@
 #include "polygon.h"
 #include "circle.h"
 
+char Map::version[] = "0.2";
+
 Map::Map()
 {   
     this->leftConstraint = 1.0e70;

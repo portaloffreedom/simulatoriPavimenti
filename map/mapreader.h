@@ -25,7 +25,6 @@
 #include <qxmlstream.h>
 #include "map.h"
 
-
 class MapReader : public QObject
 {
 Q_OBJECT
@@ -34,9 +33,10 @@ public:
     virtual ~MapReader();
     bool getMap();
     bool parse();
+    bool parse2();
     
 signals:
-    void error(QString);
+    void error(QString,QString);
     void finished(Map*);
     
     
@@ -65,11 +65,15 @@ signals:
     void closeObstacle();
     
 private:
-    bool parsePolygon(QXmlStreamReader &xml, void (MapReader::*addPolygon)(), void (MapReader::*addPolygonPoint)(QPointF));
-    
     Map *map;
     QFile *xmlFile;
+    QXmlStreamReader xml;
     bool parseStatus;
+    
+    QXmlStreamReader::TokenType nextToken();
+    bool parseMap();
+    void error(QString);
+    bool parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*addPolygonPoint)(QPointF));
 };
 
 #endif // MAPREADER_H

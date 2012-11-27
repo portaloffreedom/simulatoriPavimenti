@@ -14,6 +14,7 @@ public:
 public slots:
     void open();
     void getMap(Map* );
+    void printError(QString,QString);
 
 
 private:

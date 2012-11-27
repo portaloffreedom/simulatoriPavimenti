@@ -33,6 +33,8 @@ public:
     Map();
     virtual ~Map();
     
+    static char version[];
+    
 public slots:
     void beginBorder(const QString description, const QString id);
     void addBorderPolygon();
