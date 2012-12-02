@@ -36,7 +36,7 @@ MapReader::MapReader(QFile &xmlFile)
     connect(this,SIGNAL(addEntrancePolygon())            ,map,SLOT(addEntrancePolygon())            );
     connect(this,SIGNAL(addEntrancePolygonPoint(QPointF)),map,SLOT(addEntrancePolygonPoint(QPointF)));
     connect(this,SIGNAL(addEntranceCircle(QPointF,qreal)),map,SLOT(addEntranceCircle(QPointF,qreal)));
-    connect(this,SIGNAL(closeEntrace())                  ,map,SLOT(closeEntrace())                  );
+    connect(this,SIGNAL(closeEntrance())                  ,map,SLOT(closeEntrance())                );
 
     connect(this,SIGNAL(beginExit(QString,QString))  ,map,SLOT(beginExit(QString,QString))  );
     connect(this,SIGNAL(addExitPolygon())            ,map,SLOT(addExitPolygon())            );
@@ -82,6 +82,8 @@ QXmlStreamReader::TokenType MapReader::nextToken()
             return token;
         }
 
+	std::cout<<"\t@@@: ";
+        
         switch (token) {
         case QXmlStreamReader::Comment :
             std::cout<<xml.text().toString().toStdString()<<std::endl;
@@ -102,6 +104,7 @@ QXmlStreamReader::TokenType MapReader::nextToken()
             return token;
 
         default:
+	    std::cout<<xml.tokenString().toStdString()<<" -> "<<xml.name().toString().toStdString()<<std::endl;
             return token;
         }
     }
@@ -161,24 +164,231 @@ bool MapReader::parse()
 	return false;
     }
     
-    //floorimage and sensorTypes
+    // floorImage and sensorTypes
     this->nextToken();
-    
-    while(!xml.isEndElement()) {
-	
+    while(xml.isStartElement()) {
+	if (xml.name().compare("floorImage") == 0) { //TODO at least one
+	    if (this->parseFloorImage()) {
+		this->nextToken();
+		continue;
+	    }
+	    else
+		return false;
+	}
+	if (xml.name().compare("sensorTypes") == 0) { //TODO maximum one
+	    if (this->parseSensorTypes()) {
+		this->nextToken();
+		continue;
+	    }
+	    else
+		return false;
+	}
+	// Something got wrong: only floorImage or sensorTypes are expected
+	QString errorString = QString("Something got wrong");
+	QString errorDetailString = QString("Only floorImage or sensorTypes are expected.\nInstead I've found: ");
+	errorDetailString.append(xml.name());
+	emit error(errorString,errorDetailString);
+	return false;
     }
     
-    if (xml.name().compare("map") != 0) {
-	//something got really wrong! probably the document isn't well formatted
-	
-    }
+    if (!controlNotEndElement("map"))
+	return false;
 
     std::cout<<"everithing got it right!"<<std::endl;
-    return false;
-
-//     this->
+    emit finished(this->map);
+    return true;
 
 }
+
+bool MapReader::parseFloorImage()
+{
+    bool sensorParsed=false, roomParsed=false;
+    for (int i = 0; i<2; i++) {
+	this->nextToken();
+	if (!xml.isStartElement()) {
+	    QString errorString = QString("Something got wrong");
+	    QString errorDetailString = QString("Probably the document isn't well formatted.\nI should have find startElement."
+						"Instead I've found: ");
+	    errorDetailString.append(xml.tokenString());
+	    emit error(errorString,errorDetailString);
+	    return false;
+	}
+	if ( (!roomParsed) && (xml.name().compare("room") == 0) ) {
+	    if (!this->parseRoom())
+		return false;
+	    roomParsed = true;
+	    continue;
+	}
+	if ( (!sensorParsed) && (xml.name().compare("sensors") == 0) ) {
+	    if (!this->parseSensors())
+		return false;
+	    sensorParsed = true;
+	    continue;
+	}
+	
+	QString errorString = QString("Something got wrong");
+	QString errorDetailString = QString("Probably the document isn't well formatted.\nI should have find \"room\" or \"sensors\" elements."
+					    "Instead I've found: ");
+	errorDetailString.append(xml.name());
+	errorDetailString.append("Or maybe there is more than one \"room\" or \"sensors\" element (only one allowed for each one)");
+	emit error(errorString,errorDetailString);
+	return false;
+    }
+
+    this->nextToken();
+    if (!controlNotEndElement("floorImage"))
+	return false;
+
+    return true;
+}
+
+/**
+ * Funzione che si occupa di fare il parsing dell'elemento <room>
+ * 
+ * Possiede:
+ * - almeno un <border>: limiti della stanza.
+ * - almeno un <entrance>: zona in cui nuove entità mobili possono apparire
+ * - almeno un <exit>: zona in cui le entità mobili possono sparire
+ * - nessuno, uno o tanti <obstacle>: ostacolo fisso non intersecabile con le entità mobili.
+ */
+bool MapReader::parseRoom()
+{
+    bool borderParsed = false;
+    bool entranceParsed = false;
+    bool exitParsed = false;
+    
+    this->nextToken();
+    while(xml.isStartElement()) {
+	if ( xml.name().compare("border") == 0) {
+	    if (!this->parseFigure(&MapReader::beginBorder,
+				   &MapReader::addBorderPolygon,
+				   &MapReader::addBorderPolygonPoint,
+				   &MapReader::addBorderCircle,
+				   &MapReader::closeBorder ))
+		return false;
+	    borderParsed = true;
+	    this->nextToken();
+	    continue;
+	}
+	if ( xml.name().compare("entrance") == 0) {
+	    if (!this->parseFigure(&MapReader::beginEntrance,
+				   &MapReader::addEntrancePolygon,
+				   &MapReader::addEntrancePolygonPoint,
+				   &MapReader::addEntranceCircle,
+				   &MapReader::closeEntrance ))
+		return false;
+	    entranceParsed = true;
+	    this->nextToken();
+	    continue;
+	}
+	if ( xml.name().compare("exit") == 0) {
+	    if (!this->parseFigure(&MapReader::beginExit,
+				   &MapReader::addExitPolygon,
+				   &MapReader::addExitPolygonPoint,
+				   &MapReader::addExitCircle,
+				   &MapReader::closeExit ))
+		return false;
+	    exitParsed = true;
+	    this->nextToken();
+	    continue;
+	}
+	if ( xml.name().compare("obstacle") == 0) {
+	    if (!this->parseFigure(&MapReader::beginObstacle,
+				   &MapReader::addObstaclePolygon,
+				   &MapReader::addObstaclePolygonPoint,
+				   &MapReader::addObstacleCircle,
+				   &MapReader::closeObstacle ))
+		return false;
+	    this->nextToken();
+	    continue;
+	}
+
+	//TODO emit error
+	emit error("ciccia","pappa");
+	return false;
+    }
+    
+    if (!controlNotEndElement("room"))
+	return false;
+
+    if ( !borderParsed || !entranceParsed || !exitParsed ) {
+	QString errorString = QString("Not all elements necessary found.");
+	QString errorDetailString = QString("There must be at least one Border, one Entrace and one Exit");
+	emit error(errorString,errorDetailString);
+	return false;
+    }
+
+    return true;
+
+}
+
+bool MapReader::parseFigure(void (MapReader::*begin)(const QString description, const QString id),
+			    void (MapReader::*addPolygon)(),
+			    void (MapReader::*addPolygonPoint)(QPointF),
+			    void (MapReader::*addCircle)(QPointF center, qreal radius),
+			    void (MapReader::*close)())
+{
+    QXmlStreamAttributes attributes = xml.attributes();
+    const QString description = attributes.value("description").toString();
+    const QString id = attributes.value("id").toString();
+
+    emit (this->*begin)(description,id);
+    QStringRef figureName = xml.name();
+
+    int i;
+    this->nextToken();
+    for (i=0; xml.isStartElement(); i++) {
+	if ( xml.name().compare("polygon") == 0) {
+	    if (!this->parsePolygon(addPolygon,addPolygonPoint))
+		return false;
+	    this->nextToken();
+	    continue;
+	}
+	if ( xml.name().compare("circle") == 0) {
+	    if (!this->parseCircle(addCircle))
+		return false;
+	    this->nextToken();
+	    continue;
+	}
+	// Only polygons or circles allowed
+	//TODO emit error
+	emit error("ciccia","pappa");
+	return false;
+    }
+
+    if (!controlNotEndElement(figureName.toString()))
+	return false;
+
+    if (i==0) {
+	// There should be at least one polygon or circle
+	emit error("Error parsing figure","There should be at least one polygon or circle. None found");
+	return false;
+    }
+    
+    emit (this->*close)();
+    return true;
+}
+
+
+//TODO actually doing nothing...
+bool MapReader::parseSensors()
+{
+    while ( (!xml.isEndElement()) || (xml.name().compare("sensors"))!=0 ) {
+	this->nextToken();
+    }
+    return true;
+}
+
+
+//TODO actually doing nothing...
+bool MapReader::parseSensorTypes()
+{
+    while ( (!xml.isEndElement()) || (xml.name().compare("sensorTypes"))!=0 ) {
+	this->nextToken();
+    }
+    return true;
+}
+
 
 bool MapReader::parse2()
 {
@@ -215,7 +425,7 @@ bool MapReader::parse2()
             if (xml.name().compare("entrance") == 0) {
                 emit beginEntrance("","en1");
                 parsePolygon(&MapReader::addEntrancePolygon,&MapReader::addEntrancePolygonPoint);
-                emit closeEntrace();
+                emit closeEntrance();
                 break;
             }
             if (xml.name().compare("exit") == 0) {
@@ -278,26 +488,21 @@ bool MapReader::parse2()
 bool MapReader::parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*addPolygonPoint)(QPointF))
 {
     emit (this->*addPolygon)();
-    QStringRef polygonType = xml.name();
-    QString errorString("formattazione del poligono ");
-    errorString.append(polygonType);
-    errorString.append(" non corretta: ");
+    QString errorString("formattazione del poligono non corretta: ");
 
     int counter = 0;
     while (true) {
-        xml.readNext();
+        this->nextToken();
 
-        if ((xml.isCharacters() && xml.isWhitespace()) ||
-                xml.isComment())
-            continue;
-
-        if(xml.isEndElement() && (xml.name().compare(polygonType) == 0)) {
-            //fine del poligono
-            break;
-        }
+	if(!xml.isStartElement()) {
+	    if (!controlNotEndElement("polygon"))
+		return false;
+	    else
+		break;
+	}
 
         if(xml.name().compare("point") != 0) {
-            emit error(errorString.append("non è un punto"));
+            emit error(errorString,"non è un punto");
             return false;
         }
 
@@ -306,23 +511,40 @@ bool MapReader::parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*
         float y = attributes.value("y").toString().toFloat();
         QPointF point(x,y);
         emit (this->*addPolygonPoint)(point);
-        std::cout<<"Aggiunto un punto a "<<polygonType.toString().toStdString()<<": "<<point.x()<<","<<point.y()<<std::endl;
+        std::cout<<"Aggiunto un punto a polygon: "<<point.x()<<","<<point.y()<<std::endl;
 
-        xml.readNext();
-        if (!xml.isEndElement()) {
-            emit error(errorString.append("punto non formattato bene"));
-            return false;
-        }
-
+	this->nextToken();
+	if (!controlNotEndElement("point"))
+	    return false;
+	
         counter++;
     }
-
-    if (counter<3) {
+    
+    if (counter < 3) {
         emit error(errorString.append("numero di punti non sufficenti per formare un poligono"));
         return false;
     }
     return true;
 }
+
+bool MapReader::parseCircle(void (MapReader::*addCircle)(QPointF center, qreal radius))
+{
+    QXmlStreamAttributes attributes = xml.attributes();
+    qreal cx = attributes.value("cx").toString().toDouble();
+    qreal cy = attributes.value("cy").toString().toDouble();
+    qreal radius = attributes.value("radius").toString().toDouble();
+    
+    QPointF center(cx,cy);
+    
+    emit (this->*addCircle)(center,radius);
+
+    this->nextToken();
+    if (!controlNotEndElement("circle"))
+	return false;
+
+    return true;
+}
+
 
 
 bool MapReader::getMap()
@@ -335,6 +557,23 @@ void MapReader::error(QString errorString)
     emit error("Generic Error",errorString);
     return;
 }
+
+
+bool MapReader::controlNotEndElement(QString element)
+{
+    if ( (!xml.isEndElement()) || (xml.name().compare(element) != 0) ) {
+	//something got really wrong! probably the document isn't well formatted
+	QString errorString = QString("Something got really wrong");
+	QString errorDetailString = QString("Probably the document isn't well formatted."
+					    "\nI should have found \"");
+	errorDetailString.append(element).append("\" endElement. Instead I've found: \"");
+	errorDetailString.append(xml.name()).append("\" ").append(xml.tokenString());
+	emit error(errorString,errorDetailString);
+	return false;
+    }
+    return true;
+}
+
 
 
 // #include "map/mapreader.moc"

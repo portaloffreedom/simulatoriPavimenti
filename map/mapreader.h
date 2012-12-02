@@ -50,7 +50,7 @@ signals:
     void addEntrancePolygon();
     void addEntrancePolygonPoint(QPointF point);
     void addEntranceCircle(QPointF center, qreal radius);
-    void closeEntrace();
+    void closeEntrance();
     
     void beginExit(const QString description, const QString id);
     void addExitPolygon();
@@ -71,9 +71,25 @@ private:
     bool parseStatus;
     
     QXmlStreamReader::TokenType nextToken();
-    bool parseMap();
     void error(QString);
-    bool parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*addPolygonPoint)(QPointF));
+    bool controlNotEndElement(QString element);
+    
+    // Parsing methods
+    bool parseMap();
+	bool parseFloorImage();
+	    bool parseRoom();
+		bool parseFigure(void (MapReader::*begin)(const QString description, const QString id),
+				 void (MapReader::*addPolygon)(),
+				 void (MapReader::*addPolygonPoint)(QPointF),
+				 void (MapReader::*addCircle)(QPointF center, qreal radius),
+				 void (MapReader::*close)()
+				);
+		    bool parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*addPolygonPoint)(QPointF));
+		    bool parseCircle(void (MapReader::*addCircle)(QPointF center, qreal radius));
+	    bool parseSensors();
+		bool parseSensor();
+	bool parseSensorTypes();
+	
 };
 
 #endif // MAPREADER_H

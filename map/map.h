@@ -46,7 +46,7 @@ public slots:
     void addEntrancePolygon();
     void addEntrancePolygonPoint(QPointF point);
     void addEntranceCircle(QPointF center, qreal radius);
-    void closeEntrace();
+    void closeEntrance();
     
     void beginExit(const QString description, const QString id);
     void addExitPolygon();
@@ -64,11 +64,6 @@ protected:
     void paintEvent(QPaintEvent *event);
     
 private:
-//     QPointF *border;
-//     QPointF *entrance;
-//     QPointF *exit;
-//     QPointF **obstacles;
-//     int obstacles_counter;
 
     qreal   leftConstraint;
     qreal  rightConstraint;

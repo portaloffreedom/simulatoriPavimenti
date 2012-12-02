@@ -32,7 +32,7 @@ public:
     virtual ~Circle();
     
     virtual bool isInside(QPoint& );
-    virtual void draw(QPainter& );
+    virtual void draw(QPainter& painter);
     
 public slots:
     void setCenterAndRadius(QPointF center,qreal radius);

@@ -100,8 +100,7 @@ void simulatoriPavimenti::getMap(Map* map)
 void simulatoriPavimenti::printError(QString name, QString description)
 {
     QErrorMessage *err = QErrorMessage::qtHandler();
-    QString errorString = QString(name);
-    errorString.append(":\n");
+    QString errorString = QString(name).append(":\n");
     errorString.append(description);
     
     err->showMessage(errorString);

@@ -36,8 +36,9 @@ Circle::~Circle()
 }
 
 
-void Circle::draw(QPainter& )
+void Circle::draw(QPainter& painter)
 {
+    painter.drawEllipse(center,radius,radius);
 
 } 
 
@@ -48,8 +49,8 @@ void Circle::setCenterAndRadius(QPointF center, qreal radius)
     this->radius = radius;
 }
 
-//TODO bool Circle::isInside(QPoint& )
-bool Circle::isInside(QPoint& )
+//TODO bool Circle::isInside(QPoint& point)
+bool Circle::isInside(QPoint& point)
 {
     return false;
 }

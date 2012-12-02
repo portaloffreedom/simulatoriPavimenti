@@ -17,6 +17,7 @@
 */
 
 #include <iostream>
+#include <cmath>
 #include <QPainter>
 #include <QPaintEvent>
 #include "map.h"
@@ -31,12 +32,6 @@ Map::Map()
     this->rightConstraint = -1.0e70;
     this->topConstraint = -1.0e70;
     this->bottomConstraint = 1.0e70;
-    
-    
-//     border   = new QVector<SpatialObject*>();
-//     entrance = new QVector<SpatialObject*>();
-//     exit     = new QVector<SpatialObject*>();
-//     obstacles= new QVector<SpatialObject*>();
 }
 
 void deleteInsideVector(QVector<SpatialObject*> vector)
@@ -53,11 +48,6 @@ Map::~Map()
     deleteInsideVector(entrances);
     deleteInsideVector(exits);
     deleteInsideVector(obstacles);
-    
-//     delete border;
-//     delete entrance;
-//     delete exit;
-//     delete obstacles;
  }
 
  
@@ -81,11 +71,23 @@ void Map::paintEvent(QPaintEvent* event)
     
     //draw background
     painter.fillRect(event->rect(),Qt::black);
+
+    //new origin point
+    qreal scalex = (rect().width()-margin*2)/(rightConstraint-leftConstraint);
+    qreal scaley = ((rect().height()-margin*2)/(topConstraint-bottomConstraint));
+
+    qreal scale = scaley;
+    if (scalex < scaley)
+	scale = scalex;
     
-    //TODO fare in modo che le proporzioni dell'immagine siano 1:1 e non deformate
-    painter.translate(leftConstraint+margin,rect().bottom()-bottomConstraint-margin);
-    painter.scale((rect().width()-margin*2)/(rightConstraint-leftConstraint),-((rect().height()-margin*2)/(topConstraint-bottomConstraint)));
+    qreal diffScaleX = (((rect().width()-margin*2)/scale) -(rightConstraint-leftConstraint))/2;
+    qreal diffScaleY = (((rect().height()-margin*2)/scale)-(topConstraint-bottomConstraint))/2;
     
+    painter.translate(margin,rect().bottom()-margin);
+    painter.scale(scale,-scale);
+    painter.translate(diffScaleX-leftConstraint,diffScaleY-bottomConstraint);
+
+
     //draw borders
     painter.setPen(QPen(Qt::gray));
     drawInsidePolygon(painter,borders);
@@ -194,7 +196,7 @@ void Map::addEntranceCircle(QPointF center, qreal radius)
 {
     addObjectCircle(entrances,center,radius);
 }
-void Map::closeEntrace()
+void Map::closeEntrance()
 {
     closeObject(entrances);
 }
