@@ -22,6 +22,8 @@
 
 #include <QWidget>
 #include <QEvent>
+#include "figure.h"
+#include "spatialobject.h"
 
 
 class Map : public QWidget
@@ -31,44 +33,56 @@ public:
     Map();
     virtual ~Map();
     
+    static char version[];
+    
 public slots:
-    void beginBorder();
-    void addBorderPoint(QPointF point);
+    void beginBorder(const QString description, const QString id);
+    void addBorderPolygon();
+    void addBorderPolygonPoint(QPointF point);
+    void addBorderCircle(QPointF center, qreal radius);
     void closeBorder();
     
-    void beginEntrance();
-    void addEntrancePoint(QPointF point);
-    void closeEntrace();
+    void beginEntrance(const QString description, const QString id);
+    void addEntrancePolygon();
+    void addEntrancePolygonPoint(QPointF point);
+    void addEntranceCircle(QPointF center, qreal radius);
+    void closeEntrance();
     
-    void beginExit();
-    void addExitPoint(QPointF point);
+    void beginExit(const QString description, const QString id);
+    void addExitPolygon();
+    void addExitPolygonPoint(QPointF point);
+    void addExitCircle(QPointF center, qreal radius);
     void closeExit();
     
-    void beginObstacle();
-    void addObstaclePoint(QPointF point);
+    void beginObstacle(const QString description, const QString id);
+    void addObstaclePolygon();
+    void addObstaclePolygonPoint(QPointF point);
+    void addObstacleCircle(QPointF center, qreal radius);
     void closeObstacle();
     
 protected:
     void paintEvent(QPaintEvent *event);
     
 private:
-//     QPointF *border;
-//     QPointF *entrance;
-//     QPointF *exit;
-//     QPointF **obstacles;
-//     int obstacles_counter;
 
-    float  leftConstraint;
-    float rightConstraint;
-    float    topConstraint;
-    float  bottomConstraint;
+    qreal   leftConstraint;
+    qreal  rightConstraint;
+    qreal    topConstraint;
+    qreal bottomConstraint;
 
-    QVector<QPointF> *border_v;
-    QVector<QPointF> *entrance_v;
-    QVector<QPointF> *exit_v;
-    QVector<QVector<QPointF>*> *obstacles_v;
+    QVector<SpatialObject*> borders;
+    QVector<SpatialObject*> entrances;
+    QVector<SpatialObject*> exits;
+    QVector<SpatialObject*> obstacles;
     
-    void analyzeConstraints(QPointF point);
+    void analyzeConstraints(const QPointF point);
+    void analyzeCirlceConstraints(const QPointF center, const qreal radius);
+    
+    void beginObject(QVector< SpatialObject* >& objectVect, QString name, QString description, const QString id);
+    void addObjectPolygon(QVector< SpatialObject* >& objectVect);
+    void addObjectPolygonPoint(QVector< SpatialObject* >& objectVect, QPointF point);
+    void addObjectCircle(QVector< SpatialObject* >& objectVect, QPointF center, qreal radius);
+    void closeObject(QVector< SpatialObject* >& objectVect);
 };
 
 #endif // MAP_H
