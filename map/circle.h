@@ -21,6 +21,7 @@
 #define CIRCLE_H
 
 #include <../map/figure.h>
+#include <cmath>
 
 
 class Circle : public Figure
@@ -31,7 +32,7 @@ public:
     Circle(QPointF center, qreal radius);
     virtual ~Circle();
     
-    virtual bool isInside(QPoint& );
+    virtual bool isInside(QPointF& point );
     virtual void draw(QPainter& painter);
     
 public slots:

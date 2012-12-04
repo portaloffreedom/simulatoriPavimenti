@@ -29,7 +29,7 @@ public:
     Figure() {};
     virtual ~Figure() {};
     virtual void draw(QPainter&) = 0;
-    virtual bool isInside(QPoint&) = 0;
+    virtual bool isInside(QPointF&) = 0;
 };
 
 #endif // FIGURE_H

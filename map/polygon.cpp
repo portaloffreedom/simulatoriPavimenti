@@ -40,8 +40,17 @@ void Polygon::addVertex(QPointF point)
 }
 
 //TODO bool Polygon::isInside(QPoint& )
-bool Polygon::isInside(QPoint& )
+/**
+ * reference: http://en.wikipedia.org/wiki/Point_in_polygon
+ */
+bool Polygon::isInside(QPointF& point)
 {
+    //first tests the distance from the center of the polygon
+    
+
+    //then if is closer enough a more complex test is taken
+
+	//take care if the intersection point is a vertex
     return false;
 }
 

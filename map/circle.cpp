@@ -49,9 +49,15 @@ void Circle::setCenterAndRadius(QPointF center, qreal radius)
     this->radius = radius;
 }
 
-//TODO bool Circle::isInside(QPoint& point)
-bool Circle::isInside(QPoint& point)
+//TODO controllare bool Circle::isInside(QPoint& point)
+bool Circle::isInside(QPointF& point)
 {
-    return false;
+    qreal distancex = (point.x()-center.x())*(point.x()-center.x());
+    qreal distancey = (point.y()-center.y())*(point.y()-center.y());
+    qreal distance = sqrt(distancex+distancey);
+    if (distance < radius)
+	return true;
+    else
+	return false;
 }
 

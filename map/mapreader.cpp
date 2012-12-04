@@ -82,7 +82,7 @@ QXmlStreamReader::TokenType MapReader::nextToken()
             return token;
         }
 
-	std::cout<<"\t@@@: ";
+// 	std::cout<<"\t@@@: ";
         
         switch (token) {
         case QXmlStreamReader::Comment :
@@ -194,7 +194,7 @@ bool MapReader::parse()
     if (!controlNotEndElement("map"))
 	return false;
 
-    std::cout<<"everithing got it right!"<<std::endl;
+    std::cout<<"everything got it right!"<<std::endl;
     emit finished(this->map);
     return true;
 

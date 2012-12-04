@@ -28,7 +28,7 @@ public:
     Polygon();
     virtual ~Polygon();
     virtual void draw(QPainter& );
-    virtual bool isInside(QPoint& );
+    virtual bool isInside(QPointF& point );
     virtual void addVertex(QPointF);
     
 private:
