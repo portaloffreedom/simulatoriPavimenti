@@ -17,9 +17,14 @@
 */
 
 #include <iostream>
+#include <cmath>
 #include <QPainter>
 #include <QPaintEvent>
 #include "map.h"
+#include "polygon.h"
+#include "circle.h"
+
+char Map::version[] = "0.2";
 
 Map::Map()
 {   
@@ -27,78 +32,77 @@ Map::Map()
     this->rightConstraint = -1.0e70;
     this->topConstraint = -1.0e70;
     this->bottomConstraint = 1.0e70;
-    
-    
-    border_v   = new QVector<QPointF>();
-    entrance_v = new QVector<QPointF>();
-    exit_v     = new QVector<QPointF>();
-    obstacles_v = new QVector<QVector<QPointF>*>();
-//     obstacles_counter = 0;
-    this->show();
+}
+
+void deleteInsideVector(QVector<SpatialObject*> vector)
+{
+    while (!vector.isEmpty()) {
+	delete vector.last();
+	vector.pop_back();
+    }
 }
 
 Map::~Map()
 {
-//     delete[] border;
-//     delete[] entrance;
-//     delete[] exit;
-//     
-//     for (int i=0; i<obstacles_counter; i++) 
-// 	delete obstacles[i];
-//     delete[] obstacles;
-    
-    
-    
-    delete border_v;
-    delete entrance_v;
-    delete exit_v;
-    
-    if (obstacles_v != NULL) {
-	while (!obstacles_v->empty()) {
-	    delete obstacles_v->last();
-	    obstacles_v->pop_back();
-	}
-	delete obstacles_v;
+    deleteInsideVector(borders);
+    deleteInsideVector(entrances);
+    deleteInsideVector(exits);
+    deleteInsideVector(obstacles);
+ }
+
+ 
+void drawInsidePolygon(QPainter& painter,QVector<SpatialObject*> vector)
+{
+    for (int i = 0; i < vector.size(); i++) {
+	vector[i]->draw(painter);
     }
 }
 
 void Map::paintEvent(QPaintEvent* event)
 {
     float margin = 10;
-//     float leftConstraint = this->leftConstraint +50;
-//     float rightConstraint = this->rightConstraint *border;
-//     float bottomConstraint = this->bottomConstraint +50;
-//     float topConstraint = this->topConstraint *border;
     
-    //QWidget::paintEvent(event);
     QPainter painter;
     painter.begin(this);
-//     painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::Antialiasing);
     painter.save();
     
-    //disegna ------------------------------------------------------------------
+    //draw ---------------------------------------------------------------------
     
-    //disegna sfondo
+    //draw background
     painter.fillRect(event->rect(),Qt::black);
+
+    //new origin point
+    qreal scalex = (rect().width()-margin*2)/(rightConstraint-leftConstraint);
+    qreal scaley = ((rect().height()-margin*2)/(topConstraint-bottomConstraint));
+
+    qreal scale = scaley;
+    if (scalex < scaley)
+	scale = scalex;
     
-    painter.translate(leftConstraint+margin,rect().bottom()-bottomConstraint-margin);
-    painter.scale((rect().width()-margin*2)/(rightConstraint-leftConstraint),-((rect().height()-margin*2)/(topConstraint-bottomConstraint)));
-    //disegna bordo
+    qreal diffScaleX = (((rect().width()-margin*2)/scale) -(rightConstraint-leftConstraint))/2;
+    qreal diffScaleY = (((rect().height()-margin*2)/scale)-(topConstraint-bottomConstraint))/2;
+    
+    painter.translate(margin,rect().bottom()-margin);
+    painter.scale(scale,-scale);
+    painter.translate(diffScaleX-leftConstraint,diffScaleY-bottomConstraint);
+
+
+    //draw borders
     painter.setPen(QPen(Qt::gray));
-    std::cout<<"disegno bordo: \tdimensioni "<<border_v->size()<<std::endl;
-    painter.drawPolygon(border_v->data(),border_v->size());
+    drawInsidePolygon(painter,borders);
     
+    //draw exits
     painter.setPen(QPen(Qt::red));
-    std::cout<<"disegno uscita:\tdimensioni "<<exit_v->size()<<std::endl;
-    painter.drawPolygon(exit_v->data(),exit_v->size());
+    drawInsidePolygon(painter,exits);
     
+    //draw entrances
     painter.setPen(QPen(Qt::green));
-    std::cout<<"disegno entrata:\tdimensioni "<<entrance_v->size()<<std::endl;
-    painter.drawPolygon(entrance_v->data(),entrance_v->size());
+    drawInsidePolygon(painter,entrances);
     
+    //draw obstacles
     painter.setPen(QPen(Qt::white));
-    std::cout<<"disegno ostacolo:\tdimensioni "<<obstacles_v->last()->size()<<std::endl;
-    painter.drawPolygon(obstacles_v->last()->data(),obstacles_v->last()->size());
+    drawInsidePolygon(painter,obstacles);
     
     
     //fine disegno -------------------------------------------------------------
@@ -106,8 +110,16 @@ void Map::paintEvent(QPaintEvent* event)
     painter.end();
     
 }
+void Map::analyzeCirlceConstraints(const QPointF center, const qreal radius)
+{
+    QPointF upperRight = center + QPointF(radius,radius);
+    QPointF bottomLeft = center - QPointF(radius,radius);
+    
+    analyzeConstraints(upperRight);
+    analyzeConstraints(bottomLeft);
+}
 
-void Map::analyzeConstraints(QPointF point)
+void Map::analyzeConstraints(const QPointF point)
 {
     if (point.x() < leftConstraint)
 	leftConstraint = point.x();
@@ -119,99 +131,116 @@ void Map::analyzeConstraints(QPointF point)
 	topConstraint = point.y();
 }
 
+void Map::beginObject(QVector< SpatialObject* > &objectVect, QString name, QString description, const QString id)
+{
+    objectVect.append(new SpatialObject(name,description,id));
+}
+void Map::addObjectPolygon(QVector< SpatialObject* > &objectVect)
+{
+    objectVect.last()->addFigure(new Polygon());
+}
+void Map::addObjectPolygonPoint(QVector< SpatialObject* > &objectVect, QPointF point)
+{
+    reinterpret_cast<Polygon*>(objectVect.last()->lastFigure())->addVertex(point);
+    analyzeConstraints(point);
+//     std::cout<<"Aggiunto un punto al bordo: "<<point.x()<<","<<point.y()<<std::endl;
+}
+void Map::addObjectCircle(QVector< SpatialObject* > &objectVect, QPointF center, qreal radius)
+{
+    objectVect.last()->addFigure(new Circle(center,radius));
+    analyzeCirlceConstraints(center,radius);
+}
+void Map::closeObject(QVector< SpatialObject* > &objectVect)
+{
+    //To Optimize Memory
+//     objectVect->resize(border_v->size());
+}
+
 
 //Border section
-void Map::beginBorder()
+void Map::beginBorder(const QString description, const QString id)
 {
-    border_v->reserve(3);
+    beginObject(borders,"Border",description,id);
 }
-void Map::addBorderPoint(QPointF point)
+void Map::addBorderPolygon()
+{
+    addObjectPolygon(borders);
+}
+void Map::addBorderPolygonPoint(QPointF point)
 {   
-    analyzeConstraints(point);
-    border_v->append(point);
-//     std::cout<<"Aggiunto un punto al bordo: "<<point.x()<<","<<point.y()<<std::endl;
+    addObjectPolygonPoint(borders,point);
+}
+void Map::addBorderCircle(QPointF center, qreal radius)
+{
+    addObjectCircle(borders,center,radius);
 }
 void Map::closeBorder()
 {
-    //To Optimize Memory
-//     border_v->resize(border_v->size());
+    closeObject(borders);
 }
 
 //entrance section
-void Map::beginEntrance()
+void Map::beginEntrance(const QString description, const QString id)
 {
-    entrance_v->reserve(3);
+    beginObject(entrances,"Entrance",description,id);
 }
-void Map::addEntrancePoint(QPointF point)
+void Map::addEntrancePolygon()
 {
-    analyzeConstraints(point);
-    entrance_v->append(point);
+    addObjectPolygon(entrances);
 }
-void Map::closeEntrace()
+void Map::addEntrancePolygonPoint(QPointF point)
 {
-    //To Optimize Memory
-//     entrance_v->resize(entrance_v->size());
+    addObjectPolygonPoint(entrances,point);
+}
+void Map::addEntranceCircle(QPointF center, qreal radius)
+{
+    addObjectCircle(entrances,center,radius);
+}
+void Map::closeEntrance()
+{
+    closeObject(entrances);
 }
 
 //Exit section
-void Map::beginExit()
+void Map::beginExit(const QString description, const QString id)
 {
-    exit_v->reserve(3);
+    beginObject(exits,"Exit",description,id);
 }
-void Map::addExitPoint(QPointF point)
+void Map::addExitPolygon()
 {
-    analyzeConstraints(point);
-    exit_v->append(point);
+    addObjectPolygon(exits);
+}
+void Map::addExitPolygonPoint(QPointF point)
+{
+    addObjectPolygonPoint(exits,point);
+}
+void Map::addExitCircle(QPointF center, qreal radius)
+{
+    addObjectCircle(exits,center,radius);
 }
 void Map::closeExit()
 {
-    //To Optimize Memory
-//     exit_v->resize(exit_v->size());
+    closeObject(exits);
 }
 
 //Obstacle section
-void Map::beginObstacle()
+void Map::beginObstacle(const QString description, const QString id)
 {
-    obstacles_v->append(new QVector<QPointF>);
-    obstacles_v->last()->reserve(3);
+    beginObject(obstacles,"Obstacle",description,id);
 }
-void Map::addObstaclePoint(QPointF point)
+void Map::addObstaclePolygon()
 {
-    analyzeConstraints(point);
-    obstacles_v->last()->append(point);
+    addObjectPolygon(obstacles);
+}
+void Map::addObstaclePolygonPoint(QPointF point)
+{
+    addObjectPolygonPoint(obstacles,point);
+}
+void Map::addObstacleCircle(QPointF center, qreal radius)
+{
+    addObjectCircle(obstacles,center,radius);
 }
 void Map::closeObstacle()
 {
-    //To Optimize Memory
-//     obstacles_v->last()->resize(obstacles_v->last()->size());
+    closeObject(obstacles);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

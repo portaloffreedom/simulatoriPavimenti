@@ -7,6 +7,7 @@
 #include <QtGui/QAction>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QErrorMessage>
 
 #include <iostream>
 #include <QXmlStreamReader>
@@ -22,6 +23,7 @@ simulatoriPavimenti::simulatoriPavimenti()
 //     menuBar()->addMenu( "File" )->addAction( a );
     this->createActions();
     this->createMenus();
+//     this->setMinimumSize(200,200);
 }
 
 simulatoriPavimenti::~simulatoriPavimenti()
@@ -57,29 +59,55 @@ void simulatoriPavimenti::createMenus()
     fileMenu->addAction(exitAct);
 }
 
-bool parse(QFile &xmlFile);
 void simulatoriPavimenti::open()
 {
     QString fileName =
-	    QFileDialog::getOpenFileName(this, tr("Open xml File"),
-					QDir::currentPath(),
-					tr("XML Files (*.xml)"));
+        QFileDialog::getOpenFileName(this, tr("Open xml File"),
+                                     QDir::currentPath(),
+                                     tr("XML Files (*.xml)"));
     if (fileName.isEmpty())
-	return;
+        return;
 
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-	QMessageBox::warning(this, tr("SAX Bookmarks"),
-			    tr("Cannot read file %1:\n%2.")
-			    .arg(fileName)
-			    .arg(file.errorString()));
-	return;
+        QMessageBox::warning(this, tr("SAX Bookmarks"),
+                             tr("Cannot read file %1:\n%2.")
+                             .arg(fileName)
+                             .arg(file.errorString()));
+        return;
     }
-    
+
     std::cout<<"file scelto: "<<fileName.toStdString()<<std::endl;
-    
+
     MapReader mapreader(file);
+    connect(&mapreader,SIGNAL(finished(Map*)),this,SLOT(getMap(Map*)));
+    connect(&mapreader,SIGNAL(error(QString,QString)),this,SLOT(printError(QString,QString)));
+    mapreader.parse();
+    disconnect(&mapreader,SIGNAL(finished(Map*)),this,SLOT(getMap(Map*)));
+    disconnect(&mapreader,SIGNAL(error(QString,QString)),this,SLOT(printError(QString,QString)));
+
 
 }
- 
+
+void simulatoriPavimenti::getMap(Map* map)
+{
+    this->map = map;
+    this->map->setMinimumSize(100,100);
+    this->setCentralWidget(map);
+//     this->map->resize(400,400); //TODO make this work (preferred size style)
+}
+
+void simulatoriPavimenti::printError(QString name, QString description)
+{
+    QErrorMessage *err = QErrorMessage::qtHandler();
+    QString errorString = QString(name).append(":\n");
+    errorString.append(description);
+    
+    err->showMessage(errorString);
+    
+    std::cerr<<"#ERROR: "<<errorString.toStdString()<<std::endl;
+}
+
+
+
 // #include "simulatoriPavimenti.moc"

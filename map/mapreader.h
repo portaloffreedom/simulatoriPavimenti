@@ -25,7 +25,6 @@
 #include <qxmlstream.h>
 #include "map.h"
 
-
 class MapReader : public QObject
 {
 Q_OBJECT
@@ -33,35 +32,64 @@ public:
     MapReader(QFile& xmlFile);
     virtual ~MapReader();
     bool getMap();
+    bool parse();
+    bool parse2();
     
 signals:
-    void error(QString);
+    void error(QString,QString);
     void finished(Map*);
     
     
-    void beginBorder();
-    void addBorderPoint(QPointF point);
+    void beginBorder(const QString description, const QString id);
+    void addBorderPolygon();
+    void addBorderPolygonPoint(QPointF point);
+    void addBorderCircle(QPointF center, qreal radius);
     void closeBorder();
     
-    void beginEntrance();
-    void addEntrancePoint(QPointF point);
-    void closeEntrace();
+    void beginEntrance(const QString description, const QString id);
+    void addEntrancePolygon();
+    void addEntrancePolygonPoint(QPointF point);
+    void addEntranceCircle(QPointF center, qreal radius);
+    void closeEntrance();
     
-    void beginExit();
-    void addExitPoint(QPointF point);
+    void beginExit(const QString description, const QString id);
+    void addExitPolygon();
+    void addExitPolygonPoint(QPointF point);
+    void addExitCircle(QPointF center, qreal radius);
     void closeExit();
     
-    void beginObstacle();
-    void addObstaclePoint(QPointF point);
+    void beginObstacle(const QString description, const QString id);
+    void addObstaclePolygon();
+    void addObstaclePolygonPoint(QPointF point);
+    void addObstacleCircle(QPointF center, qreal radius);
     void closeObstacle();
     
 private:
-    bool parse();
-    bool parsePolygon(QXmlStreamReader &xml, void (MapReader::*)(), void (MapReader::*)(QPointF), void (MapReader::*)());
-    
     Map *map;
     QFile *xmlFile;
+    QXmlStreamReader xml;
     bool parseStatus;
+    
+    QXmlStreamReader::TokenType nextToken();
+    void error(QString);
+    bool controlNotEndElement(QString element);
+    
+    // Parsing methods
+    bool parseMap();
+	bool parseFloorImage();
+	    bool parseRoom();
+		bool parseFigure(void (MapReader::*begin)(const QString description, const QString id),
+				 void (MapReader::*addPolygon)(),
+				 void (MapReader::*addPolygonPoint)(QPointF),
+				 void (MapReader::*addCircle)(QPointF center, qreal radius),
+				 void (MapReader::*close)()
+				);
+		    bool parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*addPolygonPoint)(QPointF));
+		    bool parseCircle(void (MapReader::*addCircle)(QPointF center, qreal radius));
+	    bool parseSensors();
+		bool parseSensor();
+	bool parseSensorTypes();
+	
 };
 
 #endif // MAPREADER_H
