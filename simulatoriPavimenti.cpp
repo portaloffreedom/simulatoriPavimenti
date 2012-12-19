@@ -12,7 +12,7 @@
 #include <iostream>
 #include <QXmlStreamReader>
 
-simulatoriPavimenti::simulatoriPavimenti()
+SimulatoriPavimenti::SimulatoriPavimenti()
 {
 //     QLabel* l = new QLabel( this );
 //     l->setText( "Hello World!" );
@@ -26,10 +26,10 @@ simulatoriPavimenti::simulatoriPavimenti()
 //     this->setMinimumSize(200,200);
 }
 
-simulatoriPavimenti::~simulatoriPavimenti()
+SimulatoriPavimenti::~SimulatoriPavimenti()
 {}
 
-void simulatoriPavimenti::createActions()
+void SimulatoriPavimenti::createActions()
 {
     openAct = new QAction(tr("&Open..."), this);
     openAct->setShortcuts(QKeySequence::Open);
@@ -51,7 +51,7 @@ void simulatoriPavimenti::createActions()
 }
 
 
-void simulatoriPavimenti::createMenus()
+void SimulatoriPavimenti::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openAct);
@@ -59,7 +59,7 @@ void simulatoriPavimenti::createMenus()
     fileMenu->addAction(exitAct);
 }
 
-void simulatoriPavimenti::open()
+void SimulatoriPavimenti::open()
 {
     QString fileName =
         QFileDialog::getOpenFileName(this, tr("Open xml File"),
@@ -89,15 +89,21 @@ void simulatoriPavimenti::open()
 
 }
 
-void simulatoriPavimenti::getMap(Map* map)
+void SimulatoriPavimenti::getMap(Map* map)
 {
     this->map = map;
     this->map->setMinimumSize(100,100);
     this->setCentralWidget(map);
+
+    this->engine = new TrafficEngine(map);
+    stepButton = new QPushButton("step");
+    connect(stepButton,SIGNAL(pressed()),engine,SLOT(step()));
+    stepButton->show(); //TODO show this in the main window
+    
 //     this->map->resize(400,400); //TODO make this work (preferred size style)
 }
 
-void simulatoriPavimenti::printError(QString name, QString description)
+void SimulatoriPavimenti::printError(QString name, QString description)
 {
     QErrorMessage *err = QErrorMessage::qtHandler();
     QString errorString = QString(name).append(":\n");

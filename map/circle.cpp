@@ -16,8 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cmath>
+
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
 
 #include "circle.h"
+#include "../service/randomservice.h"
 
 Circle::Circle()
 {
@@ -52,12 +58,47 @@ void Circle::setCenterAndRadius(QPointF center, qreal radius)
 //TODO controllare bool Circle::isInside(QPoint& point)
 bool Circle::isInside(QPointF& point)
 {
-    qreal distancex = (point.x()-center.x())*(point.x()-center.x());
-    qreal distancey = (point.y()-center.y())*(point.y()-center.y());
+    #define SQR(x)  ((x)*(x))
+    
+    qreal distancex = SQR(point.x()-center.x());
+    qreal distancey = SQR(point.y()-center.y());
     qreal distance = sqrt(distancex+distancey);
     if (distance < radius)
 	return true;
     else
 	return false;
+
+    #undef SQR
 }
+
+qreal Circle::area()
+{
+    #define SQR(x)  ((x)*(x))
+
+    return M_PI * SQR(radius);
+
+    #undef SQR
+}
+
+QPointF Circle::getRandomPointInside()
+{
+    #define SQR(x) ((x)*(x))
+
+    qreal randy = randomService.randomReal();
+    randy *= radius * 2;
+    randy -= radius;
+
+    qreal bondx = std::sqrt(SQR(radius)-SQR(randy));
+
+    qreal randx = randomService.randomReal();
+    randx *= bondx *2;
+    randx -= bondx;
+
+    #undef RAND
+
+    return QPointF(randx,randy) + center;
+    
+}
+
+
 

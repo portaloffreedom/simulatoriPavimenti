@@ -19,14 +19,85 @@
 
 
 #include "trafficengine.h"
+#include "behaviors/defaultbehavior.h"
+#include "behaviors/pathbehavior.h"
 
-TrafficEngine::TrafficEngine()
+TrafficEngine::TrafficEngine(Map* map)
 {
+    this->map = map;
+    this->timer = new QTimer(this);
+    this->addBehavior(new PathBehavior(this));
 
+    connect(timer,SIGNAL(timeout()),this,SLOT(step()));
+    connect(map,SIGNAL(isDrawing(QPainter&)),this,SLOT(drawAgents(QPainter&)));
+
+    this->createAgent();
 }
 
 TrafficEngine::~TrafficEngine()
 {
+    delete this->map;
+//     this->~QObject();
+}
+
+void TrafficEngine::start(uint ms)
+{
+    this->timer->start(ms);
+}
+
+//TODO void TrafficEngine::step()
+void TrafficEngine::step()
+{
+    this->move(0);
+    this->map->repaint();
+}
+
+void TrafficEngine::createAgent(int behaviorI)
+{
+    this->createAgent(this->behaviorList[behaviorI]);
+}
+
+void TrafficEngine::createAgent(AgentBehavior* behavior)
+{
+    QPointF position = map->getEntrancePoint();
+    Agent* agent = new Agent("ciccio","","a1",position,behavior);
+    this->agentList.append(agent);
+}
+
+int TrafficEngine::addBehavior(AgentBehavior* behavior)
+{
+    int pos = behaviorList.size();
+    this->behaviorList.append(behavior);
+    return pos;
+}
+
+void TrafficEngine::move(uint ms)
+{
+    Agent *agent;
+    foreach(agent,agentList) {
+	agent->callMotion();
+    }
 
 }
+
+void TrafficEngine::drawAgents(QPainter& painter)
+{
+    painter.save();
+    
+    painter.setPen(QPen(Qt::magenta));
+    painter.setBrush(QBrush(Qt::magenta));
+    Agent *agent;
+    foreach(agent,agentList) {
+	agent->draw(painter);
+    }
+
+    painter.restore();
+}
+
+
+
+
+
+
+
 

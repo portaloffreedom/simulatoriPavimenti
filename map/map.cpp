@@ -20,9 +20,11 @@
 #include <cmath>
 #include <QPainter>
 #include <QPaintEvent>
+
 #include "map.h"
 #include "polygon.h"
 #include "circle.h"
+#include "../service/randomservice.h"
 
 char Map::version[] = "0.2";
 
@@ -104,6 +106,7 @@ void Map::paintEvent(QPaintEvent* event)
     painter.setPen(QPen(Qt::white));
     drawInsidePolygon(painter,obstacles);
     
+    emit isDrawing(painter);
     
     //fine disegno -------------------------------------------------------------
     painter.restore();
@@ -243,4 +246,12 @@ void Map::addObstacleCircle(QPointF center, qreal radius)
 void Map::closeObstacle()
 {
     closeObject(obstacles);
+}
+
+QPointF Map::getEntrancePoint()
+{
+    int polNumber = randomService.randomInt() % entrances.size();
+
+    return entrances[polNumber]->getRandomPointInside();
+    
 }

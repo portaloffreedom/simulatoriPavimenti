@@ -40,6 +40,10 @@ public:
     //memory management of the figures (deletes) is handled internally SpatialObject
     void addFigure(Figure* figure);
     Figure *lastFigure();
+
+
+    QPointF getRandomPointInside();
+    qreal area();
     
 protected:
     QString name;

@@ -18,9 +18,10 @@
 
 
 #include <iostream>
+#include <QRegExp>
 
 #include "spatialobject.h"
-#include <QRegExp>
+#include "../service/randomservice.h"
 
 SpatialObject::SpatialObject(QString name, QString description, QString id)
 {
@@ -85,6 +86,23 @@ Figure *SpatialObject::lastFigure()
     return figures.back();
 }
 
+qreal SpatialObject::area()
+{
+    qreal sum = 0;
+    Figure *figure;
+    foreach(figure, this->figures) {
+	sum += figure->area();
+    }
+
+    return sum;
+}
+
+QPointF SpatialObject::getRandomPointInside()
+{
+    int polNumber = randomService.randomInt() % figures.size();
+
+    return figures[polNumber]->getRandomPointInside();
+}
 
 
 

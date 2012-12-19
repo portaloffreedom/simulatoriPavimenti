@@ -32,8 +32,13 @@ Q_OBJECT
 public:
     Map();
     virtual ~Map();
+
+    QPointF getEntrancePoint();
     
     static char version[];
+
+signals:
+    void isDrawing(QPainter &painter);
     
 public slots:
     void beginBorder(const QString description, const QString id);

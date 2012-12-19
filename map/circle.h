@@ -34,6 +34,9 @@ public:
     
     virtual bool isInside(QPointF& point );
     virtual void draw(QPainter& painter);
+
+    virtual qreal area();
+    virtual QPointF getRandomPointInside();
     
 public slots:
     void setCenterAndRadius(QPointF center,qreal radius);
