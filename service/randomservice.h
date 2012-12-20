@@ -18,45 +18,27 @@
 */
 
 
-#ifndef TRAFFICENGINE_H
-#define TRAFFICENGINE_H
+#ifndef RANDOMSERVICE_H
+#define RANDOMSERVICE_H
 
-#include <QtCore/QObject>
-#include <QTimer>
-#include "../map/map.h"
-#include "agentbehavior.h"
-#include "agent.h"
-#include "../service/timer.h"
+#include <QtGlobal>
+#include <cmath>
+#include <cstdlib>
 
-
-class TrafficEngine : public QObject
+class RandomService
 {
-Q_OBJECT
-
-private:
-    Map *map;
-    QTimer *qtimer;
-    Timer *timer;
-
-    QVector<AgentBehavior*> behaviorList;
-    QList<Agent*> agentList;
-
-    void moveAgents(qreal time);
 
 public:
-    TrafficEngine(Map *map);
-    virtual ~TrafficEngine();
+    RandomService(uint seed);
+    ~RandomService();
 
+    qreal randomReal();
+    uint randomInt();
 
-public slots:
-    void start(uint ms = 0);
-    void step();
-    void createAgent(int behaviorI = 0);
-    void createAgent(AgentBehavior* behavior);
-    int addBehavior(AgentBehavior* behavior);
-
-private slots:
-    void drawAgents(QPainter &painter);
+    static const uint RandMax = RAND_MAX;
+    static const uint RandMin = 0;
 };
 
-#endif // TRAFFICENGINE_H
+extern RandomService randomService;
+
+#endif // RANDOMSERVICE_H

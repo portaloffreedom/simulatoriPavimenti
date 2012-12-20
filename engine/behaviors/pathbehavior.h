@@ -18,45 +18,29 @@
 */
 
 
-#ifndef TRAFFICENGINE_H
-#define TRAFFICENGINE_H
+#ifndef PATHBEHAVIOR_H
+#define PATHBEHAVIOR_H
 
-#include <QtCore/QObject>
-#include <QTimer>
-#include "../map/map.h"
-#include "agentbehavior.h"
-#include "agent.h"
-#include "../service/timer.h"
+#include <../engine/agentbehavior.h>
+#include <QPoint>
+#include <QVector>
 
 
-class TrafficEngine : public QObject
+class PathBehavior : public AgentBehavior
 {
 Q_OBJECT
 
 private:
-    Map *map;
-    QTimer *qtimer;
-    Timer *timer;
-
-    QVector<AgentBehavior*> behaviorList;
-    QList<Agent*> agentList;
-
-    void moveAgents(qreal time);
+    QVector<QPointF> path;
+    const qreal tollerance;
+    
+public slots:
+    virtual void agentMove(Agent* agent, qreal time);
+    virtual void addAgent(Agent* agent);
 
 public:
-    TrafficEngine(Map *map);
-    virtual ~TrafficEngine();
-
-
-public slots:
-    void start(uint ms = 0);
-    void step();
-    void createAgent(int behaviorI = 0);
-    void createAgent(AgentBehavior* behavior);
-    int addBehavior(AgentBehavior* behavior);
-
-private slots:
-    void drawAgents(QPainter &painter);
+    PathBehavior(QObject* parent = 0);
+    virtual ~PathBehavior();
 };
 
-#endif // TRAFFICENGINE_H
+#endif // PATHBEHAVIOR_H

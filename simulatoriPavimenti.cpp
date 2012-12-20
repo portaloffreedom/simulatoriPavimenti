@@ -96,8 +96,8 @@ void SimulatoriPavimenti::getMap(Map* map)
     this->setCentralWidget(map);
 
     this->engine = new TrafficEngine(map);
-    stepButton = new QPushButton("step");
-    connect(stepButton,SIGNAL(pressed()),engine,SLOT(step()));
+    stepButton = new QPushButton("start");
+    connect(stepButton,SIGNAL(pressed()),engine,SLOT(start()));
     stepButton->show(); //TODO show this in the main window
     
 //     this->map->resize(400,400); //TODO make this work (preferred size style)

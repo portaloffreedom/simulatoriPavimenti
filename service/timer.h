@@ -18,45 +18,39 @@
 */
 
 
-#ifndef TRAFFICENGINE_H
-#define TRAFFICENGINE_H
+#ifndef TIMER_H
+#define TIMER_H
+
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
 
 #include <QtCore/QObject>
-#include <QTimer>
-#include "../map/map.h"
-#include "agentbehavior.h"
-#include "agent.h"
-#include "../service/timer.h"
 
 
-class TrafficEngine : public QObject
+class Timer : public QObject
 {
 Q_OBJECT
 
-private:
-    Map *map;
-    QTimer *qtimer;
-    Timer *timer;
-
-    QVector<AgentBehavior*> behaviorList;
-    QList<Agent*> agentList;
-
-    void moveAgents(qreal time);
-
 public:
-    TrafficEngine(Map *map);
-    virtual ~TrafficEngine();
+    explicit Timer(QObject* parent = 0);
+    virtual ~Timer();
 
 
+    qreal getElapsedSeconds();
+    qreal getElapsedSecondsAndReset();
+    
 public slots:
-    void start(uint ms = 0);
-    void step();
-    void createAgent(int behaviorI = 0);
-    void createAgent(AgentBehavior* behavior);
-    int addBehavior(AgentBehavior* behavior);
+    void reset();
 
-private slots:
-    void drawAgents(QPainter &painter);
+protected:
+    #ifdef WIN32
+    LARGE_INTEGER m_CounterFrequency;
+    LARGE_INTEGER m_LastCount;
+    #else
+    timeval m_LastCount;
+    #endif
 };
-
-#endif // TRAFFICENGINE_H
+#endif // TIMER_H

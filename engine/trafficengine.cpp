@@ -25,10 +25,11 @@
 TrafficEngine::TrafficEngine(Map* map)
 {
     this->map = map;
-    this->timer = new QTimer(this);
+    this->qtimer = new QTimer(this);
+    this->timer = new Timer(this);
     this->addBehavior(new PathBehavior(this));
 
-    connect(timer,SIGNAL(timeout()),this,SLOT(step()));
+    connect(qtimer,SIGNAL(timeout()),this,SLOT(step()));
     connect(map,SIGNAL(isDrawing(QPainter&)),this,SLOT(drawAgents(QPainter&)));
 
     this->createAgent();
@@ -42,13 +43,22 @@ TrafficEngine::~TrafficEngine()
 
 void TrafficEngine::start(uint ms)
 {
-    this->timer->start(ms);
+    if (qtimer->isActive())
+	qtimer->stop();
+    else {
+	timer->reset();
+	qtimer->start(30);
+    }
 }
 
 //TODO void TrafficEngine::step()
 void TrafficEngine::step()
 {
-    this->move(0);
+    qreal passedTime = timer->getElapsedSecondsAndReset();
+    
+    this->moveAgents(passedTime);
+
+    //paint the result
     this->map->repaint();
 }
 
@@ -71,11 +81,11 @@ int TrafficEngine::addBehavior(AgentBehavior* behavior)
     return pos;
 }
 
-void TrafficEngine::move(uint ms)
+void TrafficEngine::moveAgents(qreal time)
 {
     Agent *agent;
     foreach(agent,agentList) {
-	agent->callMotion();
+	agent->callMotion(time);
     }
 
 }
