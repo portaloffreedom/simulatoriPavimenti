@@ -33,10 +33,24 @@ public:
     ~RandomService();
 
     qreal randomReal();
-    uint randomInt();
+    uint  randomInt();
+    qreal randomNormal(qreal mu, qreal sigma);
+
+//     std::mt19937 gen;
+    qreal lastMU;
+    qreal lastSigma;
+
 
     static const uint RandMax = RAND_MAX;
     static const uint RandMin = 0;
+
+private:
+    qreal randn_notrig(qreal mu=0.0, qreal sigma=1.0);
+    qreal   randn_trig(qreal mu=0.0, qreal sigma=1.0);
+    
+    bool deviateAvailable;	//flag
+    qreal storedDeviate;	//deviate from previous calculation
+
 };
 
 extern RandomService randomService;

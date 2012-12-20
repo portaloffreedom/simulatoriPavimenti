@@ -113,21 +113,16 @@ void Agent::move(QPointF objetive, qreal time)
     
     this->position = newPosition;
     #undef SQR
-
-    #define PPOINT( a ) ( "(" <<( (a) .x() )<< ":" <<( (a) .y() )<< ")" )
     
-    std::cout<<"###############\n";
-    PARAMETERSPrintPoint("position", this->getPosition());
-    PARAMETERSPrintVal<qreal>("speed",this->speed);
-	       
-    PARAMETERSPrintVal<uint>("PARAMETERS: time",time);
-    PARAMETERSPrintVal<qreal>("PARAMETERS: distanceLine.length",distanceLine.length());
-    PARAMETERSPrintVal<qreal>("PARAMETERS: moveCount",moveCount);
-    PARAMETERSPrintPoint("PARAMETERS: distanceVect",distanceVect);
-    PARAMETERSPrintPoint("PARAMETERS: move",move);
-
-
-    #undef PPOINT
+//     std::cout<<"###############\n";
+//     PARAMETERSPrintPoint("position", this->getPosition());
+//     PARAMETERSPrintVal<qreal>("speed",this->speed);
+// 	       
+//     PARAMETERSPrintVal<uint>("PARAMETERS: time",time);
+//     PARAMETERSPrintVal<qreal>("PARAMETERS: distanceLine.length",distanceLine.length());
+//     PARAMETERSPrintVal<qreal>("PARAMETERS: moveCount",moveCount);
+//     PARAMETERSPrintPoint("PARAMETERS: distanceVect",distanceVect);
+//     PARAMETERSPrintPoint("PARAMETERS: move",move);
 }
 
 
