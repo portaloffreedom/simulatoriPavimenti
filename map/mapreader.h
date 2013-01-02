@@ -25,6 +25,14 @@
 #include <qxmlstream.h>
 #include "map.h"
 
+// #define MAPREADER_DEBUG
+
+#ifdef MAPREADER_DEBUG
+#define MAPREADER_DEBUG_COUT(a) std::cout<<"MapReader::"<<((a))<<std::endl;
+#else
+#define MAPREADER_DEBUG_COUT(a)
+#endif
+
 class MapReader : public QObject
 {
 Q_OBJECT

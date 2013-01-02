@@ -5,61 +5,31 @@
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
 #include <QtGui/QAction>
+#include <QWidget>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QErrorMessage>
+#include <QHBoxLayout>
 
 #include <iostream>
 #include <QXmlStreamReader>
 
-simulatoriPavimenti::simulatoriPavimenti()
+SimulatoriPavimenti::SimulatoriPavimenti(QWidget* parent) :
+    QMainWindow(parent),
+    engine(0),
+    map(0)
 {
-//     QLabel* l = new QLabel( this );
-//     l->setText( "Hello World!" );
-//     setCentralWidget( l );
-//     QAction* a = new QAction(this);
-//     a->setText( "Quit" );
-//     connect(a, SIGNAL(triggered()), SLOT(close()) );
-//     menuBar()->addMenu( "File" )->addAction( a );
+    this->createWidgets();
+    this->setLayouts();
     this->createActions();
     this->createMenus();
-//     this->setMinimumSize(200,200);
 }
 
-simulatoriPavimenti::~simulatoriPavimenti()
+SimulatoriPavimenti::~SimulatoriPavimenti()
 {}
 
-void simulatoriPavimenti::createActions()
-{
-    openAct = new QAction(tr("&Open..."), this);
-    openAct->setShortcuts(QKeySequence::Open);
-    connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
-//     saveAsAct = new QAction(tr("&Save As..."), this);
-//     saveAsAct->setShortcuts(QKeySequence::SaveAs);
-//     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
-
-    exitAct = new QAction(tr("E&xit"), this);
-    exitAct->setShortcuts(QKeySequence::Quit);
-    connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
-
-//     aboutAct = new QAction(tr("&About"), this);
-//     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-
-//     aboutQtAct = new QAction(tr("About &Qt"), this);
-//     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-}
-
-
-void simulatoriPavimenti::createMenus()
-{
-    fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(openAct);
-//     fileMenu->addAction(saveAsAct);
-    fileMenu->addAction(exitAct);
-}
-
-void simulatoriPavimenti::open()
+void SimulatoriPavimenti::open()
 {
     QString fileName =
         QFileDialog::getOpenFileName(this, tr("Open xml File"),
@@ -89,15 +59,23 @@ void simulatoriPavimenti::open()
 
 }
 
-void simulatoriPavimenti::getMap(Map* map)
+void SimulatoriPavimenti::getMap(Map* map)
 {
-    this->map = map;
-    this->map->setMinimumSize(100,100);
-    this->setCentralWidget(map);
-//     this->map->resize(400,400); //TODO make this work (preferred size style)
+    this->resetButtons();
+    this->setMapWidget(map);
+
+    delete this->engine;
+    engine = new TrafficEngine(map, 60);
+
+    this->centralWidget()->setVisible(true);
+
+    connect(playButton,SIGNAL(pressed()),engine,SLOT(start()));
+    connect(stepButton,SIGNAL(pressed()),engine,SLOT(singleStep()));
+    connect(speedSlider,SIGNAL(valueChanged(int)),engine,SLOT(setSpeed(int)));
+
 }
 
-void simulatoriPavimenti::printError(QString name, QString description)
+void SimulatoriPavimenti::printError(QString name, QString description)
 {
     QErrorMessage *err = QErrorMessage::qtHandler();
     QString errorString = QString(name).append(":\n");

@@ -1,32 +1,71 @@
 #ifndef simulatoriPavimenti_H
 #define simulatoriPavimenti_H
 
+#include <QApplication>
 #include <QtGui/QMainWindow>
+#include <QDockWidget>
+#include <QMenu>
+#include <QMenuBar>
+#include <QAction>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QSlider>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QSlider>
 #include "map/map.h"
+#include "engine/trafficengine.h"
 
-class simulatoriPavimenti : public QMainWindow
+class SimulatoriPavimenti : public QMainWindow
 {
-Q_OBJECT
-public:
-    simulatoriPavimenti();
-    virtual ~simulatoriPavimenti();
-    
-public slots:
-    void open();
-    void getMap(Map* );
-    void printError(QString,QString);
-
+    Q_OBJECT
 
 private:
+    void createWidgets();
+    void setLayouts();
     void createActions();
     void createMenus();
+    void setMapWidget(Map* map);
+    void resetButtons();
 
     QMenu *fileMenu;
     QAction *openAct;
     QAction *exitAct;
     
-    QWidget *map;
+    QMenu* viewMenu;
+    QAction* showLogDockAct;
+    QAction* showBehaviourDockAct;
 
+    QMenu* settingsMenu;
+    QAction* preferencesAct;
+    
+    QMenu* aboutMenu;
+    QAction* aboutAct;
+    QAction* aboutQtAct;
+
+    Map *map;
+    TrafficEngine *engine;
+
+    
+    QVBoxLayout* mainVerticalLayout;
+    QSlider* timeSlider;
+    QPushButton* playButton;
+    QPushButton *stepButton;
+    QSlider* speedSlider;
+    
+    QDockWidget* behaviourDockWidget;
+    QDockWidget* logDockWidget;
+    
+
+
+public:
+    SimulatoriPavimenti(QWidget *parent = 0);
+    virtual ~SimulatoriPavimenti();
+
+public slots:
+    void open();
+    void getMap(Map* );
+    void printError(QString,QString);
 };
 
 #endif // simulatoriPavimenti_H

@@ -6,13 +6,15 @@ set (QT_USE_QTXML TRUE)
 
 include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
-set(simulatoriPavimenti_SRCS simulatoriPavimenti.cpp main.cpp)
+set(simulatoriPavimenti_SRCS simulatoriPavimentiLayout.cpp simulatoriPavimenti.cpp main.cpp)
 set(simulatoriPavimenti_HEADERS simulatoriPavimenti.h)
 
 add_subdirectory(map)
+add_subdirectory(engine)
+add_subdirectory(service)
 
 #qt4_automoc(${simulatoriPavimenti_SRCS})
 QT4_WRAP_CPP(simulatoriPavimenti_MOCS ${simulatoriPavimenti_HEADERS})
 add_executable(simulatoriPavimenti ${simulatoriPavimenti_SRCS} ${simulatoriPavimenti_MOCS})
-target_link_libraries(simulatoriPavimenti ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} map)
+target_link_libraries(simulatoriPavimenti ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} map engine service)
 install(TARGETS simulatoriPavimenti RUNTIME DESTINATION bin)

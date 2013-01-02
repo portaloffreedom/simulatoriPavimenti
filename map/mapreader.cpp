@@ -20,6 +20,7 @@
 #include "mapreader.h"
 #include <QXmlStreamReader>
 #include <iostream>
+#include <QString>
 
 MapReader::MapReader(QFile &xmlFile)
 {
@@ -81,20 +82,20 @@ QXmlStreamReader::TokenType MapReader::nextToken()
             emit error("Generic Error",xml.errorString());
             return token;
         }
-
-	std::cout<<"\t@@@: ";
         
         switch (token) {
         case QXmlStreamReader::Comment :
-            std::cout<<xml.text().toString().toStdString()<<std::endl;
+            MAPREADER_DEBUG_COUT(xml.text().toString().toStdString())
             break; //parse the next token
 
         case QXmlStreamReader::Characters :
+#ifdef MAPREADER_DEBUG
             if (xml.isWhitespace())
-                std::cout<<"whitespaces"<<std::endl;
+                MAPREADER_DEBUG_COUT("whitespaces")
             else
-                std::cout<<xml.text().toString().toStdString()<<std::endl;
-            break; //parse the next token
+                MAPREADER_DEBUG_COUT(xml.text().toString().toStdString())
+#endif
+	    break; //parse the next token
 
         case QXmlStreamReader::NoToken :
             emit error("No Token","unexpected error: next token is a \"NoToken\"");
@@ -104,8 +105,12 @@ QXmlStreamReader::TokenType MapReader::nextToken()
             return token;
 
         default:
-	    std::cout<<xml.tokenString().toStdString()<<" -> "<<xml.name().toString().toStdString()<<std::endl;
-            return token;
+#ifdef MAPREADER_DEBUG
+	    QString tokenString = xml.tokenString();
+	    tokenString.append(" -> ").append(xml.name());
+	    MAPREADER_DEBUG_COUT(tokenString.toStdString())
+#endif
+	    return token;
         }
     }
 
@@ -194,7 +199,7 @@ bool MapReader::parse()
     if (!controlNotEndElement("map"))
 	return false;
 
-    std::cout<<"everithing got it right!"<<std::endl;
+    MAPREADER_DEBUG_COUT("everything got it right")
     emit finished(this->map);
     return true;
 
@@ -511,7 +516,12 @@ bool MapReader::parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*
         float y = attributes.value("y").toString().toFloat();
         QPointF point(x,y);
         emit (this->*addPolygonPoint)(point);
-        std::cout<<"Aggiunto un punto a polygon: "<<point.x()<<","<<point.y()<<std::endl;
+#ifdef MAPREADER_DEBUG
+	QString trace_string("Aggiunto un punto a polygon: ");
+	trace_string.append(QString::number(point.x())).append(',').append(QString::number(point.y()));
+	MAPREADER_DEBUG_COUT(trace_string.toStdString())
+	
+#endif
 
 	this->nextToken();
 	if (!controlNotEndElement("point"))

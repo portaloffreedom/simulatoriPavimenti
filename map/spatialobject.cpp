@@ -18,9 +18,10 @@
 
 
 #include <iostream>
+#include <QRegExp>
 
 #include "spatialobject.h"
-#include <QRegExp>
+#include "../service/randomservice.h"
 
 SpatialObject::SpatialObject(QString name, QString description, QString id)
 {
@@ -30,7 +31,7 @@ SpatialObject::SpatialObject(QString name, QString description, QString id)
     this->idPreposition = id.left(idNumberPos);
     this->idNumber = id.right(id.size()-idNumberPos).toUInt();
     
-    std::cout<<"caricato oggetto:\n"<<this->toString().toStdString();
+//     std::cout<<"caricato oggetto:\n"<<this->toString().toStdString();
 }
 
 SpatialObject::~SpatialObject()
@@ -85,6 +86,23 @@ Figure *SpatialObject::lastFigure()
     return figures.back();
 }
 
+qreal SpatialObject::area()
+{
+    qreal sum = 0;
+    Figure *figure;
+    foreach(figure, this->figures) {
+	sum += figure->area();
+    }
+
+    return sum;
+}
+
+QPointF SpatialObject::getRandomPointInside()
+{
+    int polNumber = randomService.randomInt() % figures.size();
+
+    return figures[polNumber]->getRandomPointInside();
+}
 
 
 

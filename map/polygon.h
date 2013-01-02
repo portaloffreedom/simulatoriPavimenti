@@ -28,11 +28,15 @@ public:
     Polygon();
     virtual ~Polygon();
     virtual void draw(QPainter& );
-    virtual bool isInside(QPoint& );
+    virtual bool isInside(QPointF& point );
+    virtual qreal area();
+    virtual QPointF getRandomPointInside();
+    
     virtual void addVertex(QPointF);
     
 private:
     QVector<QPointF> verteces;
+    QRectF boundingBox;
 };
 
 #endif // POLYGON_H
