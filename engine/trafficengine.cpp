@@ -129,7 +129,7 @@ void TrafficEngine::drawAgents(QPainter& painter)
 
 qreal TrafficEngine::getFps()
 {
-    qreal value, sum;
+    qreal value, sum=0;
     foreach(value, lastFramesDuration) {
 	sum += 1/value;
     }
@@ -138,7 +138,7 @@ qreal TrafficEngine::getFps()
 
 qreal TrafficEngine::getFrameDuration()
 {
-    qreal value, sum;
+    qreal value, sum=0;
     foreach(value, lastFramesDuration) {
 	sum += value;
     }

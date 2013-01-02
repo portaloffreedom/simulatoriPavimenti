@@ -20,7 +20,7 @@
 #ifndef CIRCLE_H
 #define CIRCLE_H
 
-#include <../map/figure.h>
+#include "../map/figure.h"
 #include <cmath>
 
 

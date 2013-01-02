@@ -21,7 +21,7 @@
 #ifndef DEFAULTBEHAVIOR_H
 #define DEFAULTBEHAVIOR_H
 
-#include <../engine/agentbehavior.h>
+#include "../agentbehavior.h"
 
 
 class DefaultBehavior : public AgentBehavior

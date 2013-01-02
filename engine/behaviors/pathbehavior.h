@@ -23,8 +23,8 @@
 
 #include <QPoint>
 #include <QVector>
-#include "../engine/agentbehavior.h"
-#include "../engine/agent.h"
+#include "../agent.h"
+#include "../agentbehavior.h"
 
 
 class PathBehavior : public AgentBehavior
