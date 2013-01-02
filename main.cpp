@@ -6,8 +6,8 @@
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
-    SimulatoriPavimenti foo;
-    foo.show();
+    SimulatoriPavimenti *foo = new SimulatoriPavimenti();
+    foo->show();
     QErrorMessage::qtHandler();
     return app.exec();
 }

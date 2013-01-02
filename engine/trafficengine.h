@@ -23,10 +23,17 @@
 
 #include <QtCore/QObject>
 #include <QTimer>
+#include <limits> //to use std::numeric_limits<float>::infinity()
+
 #include "../map/map.h"
 #include "agentbehavior.h"
 #include "agent.h"
 #include "../service/timer.h"
+
+#define ENGINE_DEBUG
+
+class AgentBehavior;
+class Agent;
 
 
 class TrafficEngine : public QObject
@@ -37,20 +44,29 @@ private:
     Map *map;
     QTimer *qtimer;
     Timer *timer;
+    qreal fps;
+    qreal speed;
 
     QVector<AgentBehavior*> behaviorList;
     QList<Agent*> agentList;
 
     void moveAgents(qreal time);
 
+    QList<qreal> lastFramesDuration;
+
 public:
-    TrafficEngine(Map *map);
+    TrafficEngine(Map *map, qreal fps=std::numeric_limits<double>::infinity());
     virtual ~TrafficEngine();
 
+    qreal getFps();
+    qreal getFrameDuration();
 
+    
 public slots:
-    void start(uint ms = 0);
+    void start();
     void step();
+    void singleStep();
+    void setSpeed(int speed);
     void createAgent(int behaviorI = 0);
     void createAgent(AgentBehavior* behavior);
     int addBehavior(AgentBehavior* behavior);

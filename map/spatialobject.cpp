@@ -31,7 +31,7 @@ SpatialObject::SpatialObject(QString name, QString description, QString id)
     this->idPreposition = id.left(idNumberPos);
     this->idNumber = id.right(id.size()-idNumberPos).toUInt();
     
-    std::cout<<"caricato oggetto:\n"<<this->toString().toStdString();
+//     std::cout<<"caricato oggetto:\n"<<this->toString().toStdString();
 }
 
 SpatialObject::~SpatialObject()

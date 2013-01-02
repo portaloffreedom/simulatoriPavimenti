@@ -20,16 +20,18 @@
 
 #include "pathbehavior.h"
 #include <QLineF>
+#include <iostream>
 
 void PathBehavior::agentMove(Agent* agent, qreal time)
 {    
     QPointF currentPos = agent->getPosition();
     QPointF objective = path.first();
     QLineF distance = QLineF(currentPos,objective);
-    if (distance.length() < tollerance) {
+    if (distance.length() < agent->getMotionStep()*tollerance) {
 	path.append(objective);
 	path.pop_front();
 	objective = path.first();
+	std::cout<<"distance("<<distance.length()<<") motionStep("<<agent->getMotionStep()<<")"<<std::endl;
     }
     agent->move(objective,time);
 
@@ -41,7 +43,7 @@ void PathBehavior::addAgent(Agent* agent)
 }
 
 PathBehavior::PathBehavior(QObject* parent): AgentBehavior(parent),
-    tollerance(0.1)
+    tollerance(1)
 {   
     //questo è un path unico provissorio
     //TODO chiedere all'utente un path

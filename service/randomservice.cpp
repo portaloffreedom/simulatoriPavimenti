@@ -95,7 +95,7 @@ qreal RandomService::randomReal()
 
 /******************************************************************************/
 //	"Polar" version without trigonometric calls
-qreal RandomService::randn_notrig(qreal mu=0.0, qreal sigma=1.0) {
+qreal RandomService::randn_notrig(qreal mu, qreal sigma) {
 // 	static bool deviateAvailable=false;	//	flag
 // 	static float storedDeviate;			//	deviate from previous calculation
 	qreal polar, rsquared, var1, var2;
@@ -137,7 +137,7 @@ qreal RandomService::randn_notrig(qreal mu=0.0, qreal sigma=1.0) {
 //	Standard version with trigonometric calls
 #define PI 3.14159265358979323846
 
-qreal RandomService::randn_trig(qreal mu=0.0, qreal sigma=1.0) {
+qreal RandomService::randn_trig(qreal mu, qreal sigma) {
 // 	static bool deviateAvailable=false;	//	flag
 // 	static float storedDeviate;			//	deviate from previous calculation
 	qreal dist, angle;

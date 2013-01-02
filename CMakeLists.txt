@@ -6,7 +6,7 @@ set (QT_USE_QTXML TRUE)
 
 include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
-set(simulatoriPavimenti_SRCS simulatoriPavimenti.cpp main.cpp)
+set(simulatoriPavimenti_SRCS simulatoriPavimentiLayout.cpp simulatoriPavimenti.cpp main.cpp)
 set(simulatoriPavimenti_HEADERS simulatoriPavimenti.h)
 
 add_subdirectory(map)

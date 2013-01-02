@@ -21,9 +21,10 @@
 #ifndef PATHBEHAVIOR_H
 #define PATHBEHAVIOR_H
 
-#include <../engine/agentbehavior.h>
 #include <QPoint>
 #include <QVector>
+#include "../engine/agentbehavior.h"
+#include "../engine/agent.h"
 
 
 class PathBehavior : public AgentBehavior

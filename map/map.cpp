@@ -34,7 +34,15 @@ Map::Map()
     this->rightConstraint = -1.0e70;
     this->topConstraint = -1.0e70;
     this->bottomConstraint = 1.0e70;
+
+    this->setMinimumSize(100,100);
 }
+
+QSize Map::sizeHint() const
+{
+    return QSize(400,400);
+}
+
 
 void deleteInsideVector(QVector<SpatialObject*> vector)
 {

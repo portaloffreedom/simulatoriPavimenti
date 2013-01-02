@@ -34,6 +34,7 @@ public:
     virtual ~Map();
 
     QPointF getEntrancePoint();
+    virtual QSize sizeHint() const;
     
     static char version[];
 

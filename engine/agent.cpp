@@ -21,24 +21,29 @@
 #include "agent.h"
 #include <cmath>
 #include <iostream>
+#include <string>
+#include "../service/randomservice.h"
 
-Agent::Agent(QString name, QString description, QString id, QPointF initialPos, AgentBehavior* behavior, QObject* parent)
-    : QObject(parent), SpatialObject(name,description,id), position(initialPos)
+Agent::Agent(QString name, QString description, QString id, QPointF initialPos,
+	     TrafficEngine *trafficEngine, AgentBehavior* behavior, QObject* parent) :
+    QObject(parent),
+    SpatialObject(name,description,id),
+    position(initialPos),
+    trafficengine(trafficEngine),
 #ifdef Agent_DEBUG
-    , objective(initialPos)
+    objective(initialPos),
 #endif
+    orientationV(1,0)
 {
-    this->orientation = 0;
+//     this->orientation = 0;
     this->speed = 0;
     this->dimensions = 0.5;
     this->maxSpeed = 3;
-    
+    this->motionNoise = .05;
+
     this->behavior = behavior;
     behavior->addAgent(this);
     connect(this,SIGNAL(callMotionSIG(Agent*,qreal)),behavior,SLOT(agentMove(Agent*,qreal)));
-
-    std::cout<<"###############\n"
-	       "position: (" <<this->position.x()<< ":" <<this->position.y()<< ")\tspeed: "<<this->speed<<std::endl;
 }
 
 Agent::~Agent()
@@ -57,14 +62,16 @@ void Agent::draw(QPainter &painter)
     painter.save();
     painter.setBrush(Qt::transparent);
     painter.drawEllipse(objective,dimensions,dimensions);
+    painter.drawLine(position,position+(orientationV*dimensions*2));
+    painter.drawLine(position,objective);
     painter.restore();
 #endif
 }
 
 qreal Agent::getMotionStep()
 {
-    //TODO it should return the motion step relative to the speed
-    return dimensions;
+    qreal frame = trafficengine->getFrameDuration();
+    return speed*frame;
     
 }
 
@@ -73,27 +80,33 @@ QPointF Agent::getPosition()
     return position;
 }
 
-qreal Agent::getOrientation()
+QPointF Agent::getOrientationV()
 {
-    return orientation;
+    return orientationV;
 }
 
-
 template <typename V>
-void PARAMETERSPrintVal(char* description, V val) {
+inline void PARAMETERSPrintVal(const std::string &description, V val) {
     std::cout<<description<<"( "<<val<<" )"<<std::endl;
 }
 
-void PARAMETERSPrintPoint(char* description, QPointF point) {
+inline void PARAMETERSPrintPoint(const std::string &description, QPointF point) {
     std::cout<<description<<"( "<<point.x()<<" : "<<point.y()<<" )"<<std::endl;
+}
+
+qreal Agent::getOrientation()
+{
+    qreal orientation = acos(orientationV.x());
+    PARAMETERSPrintPoint("PARAMETERS: orientation",QPointF(orientation,asin(orientationV.y())));
+    
+    return orientation;
 }
 
 void Agent::move(QPointF objetive, qreal time)
 {
-    #define SQR(x) ((x)*(x))
+#define SQR(x) ((x)*(x))
     
     //TODO try to move near
-    //TODO update orientation, speed and new position
     
 #ifdef Agent_DEBUG
     this->objective = objetive;
@@ -106,18 +119,26 @@ void Agent::move(QPointF objetive, qreal time)
     qreal   moveCount = distanceLine.length()/(currentSpeed*time);
 
     QPointF move = distanceVect/moveCount;
+    move.setY(randomService.randomNormal(move.y(),this->motionNoise));
+    move.setX(randomService.randomNormal(move.x(),this->motionNoise));
     QPointF newPosition = position+move;
 
-    
+
+    //update orientation, speed and new position
     this->speed = QLineF(position,newPosition).length()/(time); /* u/s */
+    this->orientationV = move;
+    orientationV /= sqrt(SQR(orientationV.x())+SQR(orientationV.y()));
     
     this->position = newPosition;
-    #undef SQR
+#undef SQR
+
+#ifdef Agent_DEBUG
+    getOrientation();
+#endif
     
 //     std::cout<<"###############\n";
 //     PARAMETERSPrintPoint("position", this->getPosition());
 //     PARAMETERSPrintVal<qreal>("speed",this->speed);
-// 	       
 //     PARAMETERSPrintVal<uint>("PARAMETERS: time",time);
 //     PARAMETERSPrintVal<qreal>("PARAMETERS: distanceLine.length",distanceLine.length());
 //     PARAMETERSPrintVal<qreal>("PARAMETERS: moveCount",moveCount);

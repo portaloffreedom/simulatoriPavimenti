@@ -1,8 +1,18 @@
 #ifndef simulatoriPavimenti_H
 #define simulatoriPavimenti_H
 
+#include <QApplication>
 #include <QtGui/QMainWindow>
+#include <QDockWidget>
+#include <QMenu>
+#include <QMenuBar>
+#include <QAction>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QSlider>
 #include <QPushButton>
+#include <QVBoxLayout>
+#include <QSlider>
 #include "map/map.h"
 #include "engine/trafficengine.h"
 
@@ -11,21 +21,45 @@ class SimulatoriPavimenti : public QMainWindow
     Q_OBJECT
 
 private:
+    void createWidgets();
+    void setLayouts();
     void createActions();
     void createMenus();
+    void setMapWidget(Map* map);
+    void resetButtons();
 
     QMenu *fileMenu;
     QAction *openAct;
     QAction *exitAct;
-    QPushButton *stepButton;
+    
+    QMenu* viewMenu;
+    QAction* showLogDockAct;
+    QAction* showBehaviourDockAct;
+
+    QMenu* settingsMenu;
+    QAction* preferencesAct;
+    
+    QMenu* aboutMenu;
+    QAction* aboutAct;
+    QAction* aboutQtAct;
 
     Map *map;
     TrafficEngine *engine;
+
+    
+    QVBoxLayout* mainVerticalLayout;
+    QSlider* timeSlider;
+    QPushButton* playButton;
+    QPushButton *stepButton;
+    QSlider* speedSlider;
+    
+    QDockWidget* behaviourDockWidget;
+    QDockWidget* logDockWidget;
     
 
 
 public:
-    SimulatoriPavimenti();
+    SimulatoriPavimenti(QWidget *parent = 0);
     virtual ~SimulatoriPavimenti();
 
 public slots:

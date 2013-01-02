@@ -5,59 +5,29 @@
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
 #include <QtGui/QAction>
+#include <QWidget>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QErrorMessage>
+#include <QHBoxLayout>
 
 #include <iostream>
 #include <QXmlStreamReader>
 
-SimulatoriPavimenti::SimulatoriPavimenti()
+SimulatoriPavimenti::SimulatoriPavimenti(QWidget* parent) :
+    QMainWindow(parent),
+    engine(0),
+    map(0)
 {
-//     QLabel* l = new QLabel( this );
-//     l->setText( "Hello World!" );
-//     setCentralWidget( l );
-//     QAction* a = new QAction(this);
-//     a->setText( "Quit" );
-//     connect(a, SIGNAL(triggered()), SLOT(close()) );
-//     menuBar()->addMenu( "File" )->addAction( a );
+    this->createWidgets();
+    this->setLayouts();
     this->createActions();
     this->createMenus();
-//     this->setMinimumSize(200,200);
 }
 
 SimulatoriPavimenti::~SimulatoriPavimenti()
 {}
 
-void SimulatoriPavimenti::createActions()
-{
-    openAct = new QAction(tr("&Open..."), this);
-    openAct->setShortcuts(QKeySequence::Open);
-    connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-
-//     saveAsAct = new QAction(tr("&Save As..."), this);
-//     saveAsAct->setShortcuts(QKeySequence::SaveAs);
-//     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
-
-    exitAct = new QAction(tr("E&xit"), this);
-    exitAct->setShortcuts(QKeySequence::Quit);
-    connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
-
-//     aboutAct = new QAction(tr("&About"), this);
-//     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
-
-//     aboutQtAct = new QAction(tr("About &Qt"), this);
-//     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-}
-
-
-void SimulatoriPavimenti::createMenus()
-{
-    fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(openAct);
-//     fileMenu->addAction(saveAsAct);
-    fileMenu->addAction(exitAct);
-}
 
 void SimulatoriPavimenti::open()
 {
@@ -91,16 +61,18 @@ void SimulatoriPavimenti::open()
 
 void SimulatoriPavimenti::getMap(Map* map)
 {
-    this->map = map;
-    this->map->setMinimumSize(100,100);
-    this->setCentralWidget(map);
+    this->resetButtons();
+    this->setMapWidget(map);
 
-    this->engine = new TrafficEngine(map);
-    stepButton = new QPushButton("start");
-    connect(stepButton,SIGNAL(pressed()),engine,SLOT(start()));
-    stepButton->show(); //TODO show this in the main window
-    
-//     this->map->resize(400,400); //TODO make this work (preferred size style)
+    delete this->engine;
+    engine = new TrafficEngine(map, 60);
+
+    this->centralWidget()->setVisible(true);
+
+    connect(playButton,SIGNAL(pressed()),engine,SLOT(start()));
+    connect(stepButton,SIGNAL(pressed()),engine,SLOT(singleStep()));
+    connect(speedSlider,SIGNAL(valueChanged(int)),engine,SLOT(setSpeed(int)));
+
 }
 
 void SimulatoriPavimenti::printError(QString name, QString description)

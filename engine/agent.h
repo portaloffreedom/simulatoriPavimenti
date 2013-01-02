@@ -23,11 +23,13 @@
 
 #include <QtCore/QObject>
 #include "agentbehavior.h"
+#include "trafficengine.h"
 #include "../map/spatialobject.h"
 
 #define Agent_DEBUG
 
 class AgentBehavior;
+class TrafficEngine;
 
 class Agent : public QObject, public SpatialObject
 {
@@ -40,23 +42,28 @@ public slots:
 
 private:
     AgentBehavior* behavior;
+    TrafficEngine* trafficengine;
+    
     QPointF position;
 #ifdef Agent_DEBUG
     QPointF objective;
 #endif
     qreal dimensions;
 
-    qreal orientation; //the angle is in radians
+//     qreal orientation; //the angle is in radians
+    QPointF orientationV; //unit vector rappresenting the orientation
     qreal speed;
 
     qreal maxAccelleration;
     qreal maxDecelleration;
     qreal maxSpeed;
+    qreal motionNoise;
     
     qreal getMaxOrientationChange(); /* relative to speed */
 
 public:
-    Agent(QString name, QString description, QString id, QPointF initialPos, AgentBehavior* behavior, QObject* parent = 0);
+    Agent(QString name, QString description, QString id, QPointF initialPos,
+	  TrafficEngine *trafficengine, AgentBehavior* behavior, QObject* parent = 0);
     virtual ~Agent();
 
     /** How far the next near objetive has to be set */
@@ -65,6 +72,7 @@ public:
     void move(QPointF objetive, qreal time);
     QPointF getPosition();
     qreal getOrientation();
+    QPointF getOrientationV();
 
 };
 
