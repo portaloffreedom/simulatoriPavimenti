@@ -86,9 +86,9 @@ Figure *SpatialObject::lastFigure()
     return figures.back();
 }
 
-qreal SpatialObject::area()
+smReal SpatialObject::area()
 {
-    qreal sum = 0;
+    smReal sum = 0;
     Figure *figure;
     foreach(figure, this->figures) {
 	sum += figure->area();

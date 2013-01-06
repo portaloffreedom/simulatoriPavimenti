@@ -15,6 +15,7 @@
 #include <QSlider>
 #include "map/map.h"
 #include "engine/trafficengine.h"
+#include "../service/simulatorePavimentiTypes.h"
 
 class SimulatoriPavimenti : public QMainWindow
 {
@@ -22,9 +23,11 @@ class SimulatoriPavimenti : public QMainWindow
 
 private:
     void createWidgets();
+    void setDockWidgets();
     void setLayouts();
     void createActions();
     void createMenus();
+    
     void setMapWidget(Map* map);
     void resetButtons();
 
@@ -54,6 +57,8 @@ private:
     QSlider* speedSlider;
     
     QDockWidget* behaviourDockWidget;
+    QVBoxLayout* behaviourLayout;
+    QPushButton* newBehaviourButton;
     QDockWidget* logDockWidget;
     
 
@@ -62,10 +67,14 @@ public:
     SimulatoriPavimenti(QWidget *parent = 0);
     virtual ~SimulatoriPavimenti();
 
+private slots:
+    void addNewBehaviour();
+    
 public slots:
     void open();
     void getMap(Map* );
     void printError(QString,QString);
+    void newBehaviourAdded(QWidget* behaviourWidget);
 };
 
 #endif // simulatoriPavimenti_H

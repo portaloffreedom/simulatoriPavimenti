@@ -24,6 +24,7 @@
 #include <QEvent>
 #include "figure.h"
 #include "spatialobject.h"
+#include "../service/simulatorePavimentiTypes.h"
 
 
 class Map : public QWidget
@@ -45,25 +46,25 @@ public slots:
     void beginBorder(const QString description, const QString id);
     void addBorderPolygon();
     void addBorderPolygonPoint(QPointF point);
-    void addBorderCircle(QPointF center, qreal radius);
+    void addBorderCircle(QPointF center, smReal radius);
     void closeBorder();
     
     void beginEntrance(const QString description, const QString id);
     void addEntrancePolygon();
     void addEntrancePolygonPoint(QPointF point);
-    void addEntranceCircle(QPointF center, qreal radius);
+    void addEntranceCircle(QPointF center, smReal radius);
     void closeEntrance();
     
     void beginExit(const QString description, const QString id);
     void addExitPolygon();
     void addExitPolygonPoint(QPointF point);
-    void addExitCircle(QPointF center, qreal radius);
+    void addExitCircle(QPointF center, smReal radius);
     void closeExit();
     
     void beginObstacle(const QString description, const QString id);
     void addObstaclePolygon();
     void addObstaclePolygonPoint(QPointF point);
-    void addObstacleCircle(QPointF center, qreal radius);
+    void addObstacleCircle(QPointF center, smReal radius);
     void closeObstacle();
     
 protected:
@@ -71,10 +72,10 @@ protected:
     
 private:
 
-    qreal   leftConstraint;
-    qreal  rightConstraint;
-    qreal    topConstraint;
-    qreal bottomConstraint;
+    smReal   leftConstraint;
+    smReal  rightConstraint;
+    smReal    topConstraint;
+    smReal bottomConstraint;
 
     QVector<SpatialObject*> borders;
     QVector<SpatialObject*> entrances;
@@ -82,12 +83,12 @@ private:
     QVector<SpatialObject*> obstacles;
     
     void analyzeConstraints(const QPointF point);
-    void analyzeCirlceConstraints(const QPointF center, const qreal radius);
+    void analyzeCirlceConstraints(const QPointF center, const smReal radius);
     
     void beginObject(QVector< SpatialObject* >& objectVect, QString name, QString description, const QString id);
     void addObjectPolygon(QVector< SpatialObject* >& objectVect);
     void addObjectPolygonPoint(QVector< SpatialObject* >& objectVect, QPointF point);
-    void addObjectCircle(QVector< SpatialObject* >& objectVect, QPointF center, qreal radius);
+    void addObjectCircle(QVector< SpatialObject* >& objectVect, QPointF center, smReal radius);
     void closeObject(QVector< SpatialObject* >& objectVect);
 };
 

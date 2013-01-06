@@ -83,15 +83,15 @@ void Map::paintEvent(QPaintEvent* event)
     painter.fillRect(event->rect(),Qt::black);
 
     //new origin point
-    qreal scalex = (rect().width()-margin*2)/(rightConstraint-leftConstraint);
-    qreal scaley = ((rect().height()-margin*2)/(topConstraint-bottomConstraint));
+    smReal scalex = (rect().width()-margin*2)/(rightConstraint-leftConstraint);
+    smReal scaley = ((rect().height()-margin*2)/(topConstraint-bottomConstraint));
 
-    qreal scale = scaley;
+    smReal scale = scaley;
     if (scalex < scaley)
 	scale = scalex;
     
-    qreal diffScaleX = (((rect().width()-margin*2)/scale) -(rightConstraint-leftConstraint))/2;
-    qreal diffScaleY = (((rect().height()-margin*2)/scale)-(topConstraint-bottomConstraint))/2;
+    smReal diffScaleX = (((rect().width()-margin*2)/scale) -(rightConstraint-leftConstraint))/2;
+    smReal diffScaleY = (((rect().height()-margin*2)/scale)-(topConstraint-bottomConstraint))/2;
     
     painter.translate(margin,rect().bottom()-margin);
     painter.scale(scale,-scale);
@@ -121,7 +121,7 @@ void Map::paintEvent(QPaintEvent* event)
     painter.end();
     
 }
-void Map::analyzeCirlceConstraints(const QPointF center, const qreal radius)
+void Map::analyzeCirlceConstraints(const QPointF center, const smReal radius)
 {
     QPointF upperRight = center + QPointF(radius,radius);
     QPointF bottomLeft = center - QPointF(radius,radius);
@@ -156,7 +156,7 @@ void Map::addObjectPolygonPoint(QVector< SpatialObject* > &objectVect, QPointF p
     analyzeConstraints(point);
 //     std::cout<<"Aggiunto un punto al bordo: "<<point.x()<<","<<point.y()<<std::endl;
 }
-void Map::addObjectCircle(QVector< SpatialObject* > &objectVect, QPointF center, qreal radius)
+void Map::addObjectCircle(QVector< SpatialObject* > &objectVect, QPointF center, smReal radius)
 {
     objectVect.last()->addFigure(new Circle(center,radius));
     analyzeCirlceConstraints(center,radius);
@@ -181,7 +181,7 @@ void Map::addBorderPolygonPoint(QPointF point)
 {   
     addObjectPolygonPoint(borders,point);
 }
-void Map::addBorderCircle(QPointF center, qreal radius)
+void Map::addBorderCircle(QPointF center, smReal radius)
 {
     addObjectCircle(borders,center,radius);
 }
@@ -203,7 +203,7 @@ void Map::addEntrancePolygonPoint(QPointF point)
 {
     addObjectPolygonPoint(entrances,point);
 }
-void Map::addEntranceCircle(QPointF center, qreal radius)
+void Map::addEntranceCircle(QPointF center, smReal radius)
 {
     addObjectCircle(entrances,center,radius);
 }
@@ -225,7 +225,7 @@ void Map::addExitPolygonPoint(QPointF point)
 {
     addObjectPolygonPoint(exits,point);
 }
-void Map::addExitCircle(QPointF center, qreal radius)
+void Map::addExitCircle(QPointF center, smReal radius)
 {
     addObjectCircle(exits,center,radius);
 }
@@ -247,7 +247,7 @@ void Map::addObstaclePolygonPoint(QPointF point)
 {
     addObjectPolygonPoint(obstacles,point);
 }
-void Map::addObstacleCircle(QPointF center, qreal radius)
+void Map::addObstacleCircle(QPointF center, smReal radius)
 {
     addObjectCircle(obstacles,center,radius);
 }

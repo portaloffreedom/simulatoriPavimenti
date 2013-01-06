@@ -1,6 +1,6 @@
 /*
     <one line to give the library's name and an idea of what it does.>
-    Copyright (C) 2012  Matteo De Carlo <email>
+    Copyright (C) 2013  Matteo De Carlo <email>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,24 +18,24 @@
 */
 
 
-#include "defaultbehavior.h"
-#include "../agent.h"
+#include "pathbehaviorwidget.h"
+#include <QHBoxLayout>
+#include <QLabel>
+#include <iostream>
 
-DefaultBehavior::DefaultBehavior(QObject* parent): AgentBehavior(parent)
+PathBehaviorWidget::PathBehaviorWidget(QWidget* parent, Qt::WindowFlags f): QWidget(parent, f)
 {
+    QVBoxLayout *vLayout = new QVBoxLayout();
+    this->setLayout(vLayout);
+    vLayout->addWidget(new QLabel("Path Behaviour"));
 
-}
+    QHBoxLayout *hLayout = new QHBoxLayout();
+    vLayout->addLayout(hLayout);
 
-void DefaultBehavior::agentMove(Agent* agent, uint ms)
-{
-    QPointF agentPosition = agent->getPosition();
-    smReal motionstep = agent->getMotionStep();
-    agentPosition += QPointF(motionstep,motionstep);
-    agent->move(agentPosition, ms);
-}
+    slider = new QSlider();
+    slider->setOrientation(Qt::Horizontal);
+    hLayout->addWidget(slider);
 
-void DefaultBehavior::addAgent(Agent* agent)
-{
-    this->agentList.append(agent);
+    button = new QPushButton("add");
 }
 

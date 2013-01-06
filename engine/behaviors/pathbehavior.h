@@ -23,6 +23,8 @@
 
 #include <QPoint>
 #include <QVector>
+#include <QMap>
+#include "pathbehaviorwidget.h"
 #include "../agent.h"
 #include "../agentbehavior.h"
 
@@ -33,11 +35,16 @@ Q_OBJECT
 
 private:
     QVector<QPointF> path;
-    const qreal tollerance;
+    const smReal tollerance;
+    PathBehaviorWidget* widget;
+    
+    QMap<Agent*,int> agents;
     
 public slots:
-    virtual void agentMove(Agent* agent, qreal time);
+    virtual void agentMove(Agent* agent, smReal time);
     virtual void addAgent(Agent* agent);
+    void remAgent(QObject *agent);
+    virtual QWidget* getBehaviourWidget();
 
 public:
     PathBehavior(QObject* parent = 0);

@@ -29,7 +29,7 @@ public:
     virtual ~Polygon();
     virtual void draw(QPainter& );
     virtual bool isInside(QPointF& point );
-    virtual qreal area();
+    virtual smReal area();
     virtual QPointF getRandomPointInside();
     
     virtual void addVertex(QPointF);

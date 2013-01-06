@@ -22,6 +22,7 @@
 #include <QString>
 #include <QPainter>
 #include "figure.h"
+#include "../service/simulatorePavimentiTypes.h"
 
 class SpatialObject
 {
@@ -43,7 +44,7 @@ public:
 
 
     QPointF getRandomPointInside();
-    qreal area();
+    smReal area();
     
 protected:
     QString name;

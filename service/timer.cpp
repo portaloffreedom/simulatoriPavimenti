@@ -44,7 +44,7 @@ void Timer::reset()
     #endif
 }
 
-qreal Timer::getElapsedSeconds()
+smRealD Timer::getElapsedSeconds()
 {
     // Get the current count
     #ifdef WIN32
@@ -57,15 +57,15 @@ qreal Timer::getElapsedSeconds()
     #else
     timeval lcurrent;
     gettimeofday(&lcurrent, 0);
-    qreal fSeconds = (qreal)(lcurrent.tv_sec - m_LastCount.tv_sec);
-    qreal fFraction = (qreal)(lcurrent.tv_usec - m_LastCount.tv_usec) * 0.000001f;
+    smRealD fSeconds = (smRealD)(lcurrent.tv_sec - m_LastCount.tv_sec);
+    smRealD fFraction = (smRealD)(lcurrent.tv_usec - m_LastCount.tv_usec) * 0.000001f;
     return fSeconds + fFraction;
     #endif
 }
 
-qreal Timer::getElapsedSecondsAndReset()
+smRealD Timer::getElapsedSecondsAndReset()
 {
-    qreal time = this->getElapsedSeconds();
+    smRealD time = this->getElapsedSeconds();
     this->reset();
     return time;
 }

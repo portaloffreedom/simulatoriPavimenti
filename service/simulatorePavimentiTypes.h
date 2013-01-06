@@ -18,24 +18,13 @@
 */
 
 
-#include "defaultbehavior.h"
-#include "../agent.h"
+#ifndef SIMULATOREPAVIMENTITYPES_H
+#define SIMULATOREPAVIMENTITYPES_H
 
-DefaultBehavior::DefaultBehavior(QObject* parent): AgentBehavior(parent)
-{
+#include <QtCore>
 
-}
+typedef float smReal;
+typedef double smRealD;
 
-void DefaultBehavior::agentMove(Agent* agent, uint ms)
-{
-    QPointF agentPosition = agent->getPosition();
-    smReal motionstep = agent->getMotionStep();
-    agentPosition += QPointF(motionstep,motionstep);
-    agent->move(agentPosition, ms);
-}
 
-void DefaultBehavior::addAgent(Agent* agent)
-{
-    this->agentList.append(agent);
-}
-
+#endif // SIMULATOREPAVIMENTITYPES_H

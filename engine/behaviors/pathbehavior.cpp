@@ -22,15 +22,15 @@
 #include <QLineF>
 #include <iostream>
 
-void PathBehavior::agentMove(Agent* agent, qreal time)
+void PathBehavior::agentMove(Agent* agent, smReal time)
 {    
     QPointF currentPos = agent->getPosition();
-    QPointF objective = path.first();
+    QPointF objective = path[agents[agent]];
     QLineF distance = QLineF(currentPos,objective);
-    if (distance.length() < agent->getMotionStep()*tollerance) {
-	path.append(objective);
-	path.pop_front();
-	objective = path.first();
+    if (distance.length() < agent->getMotionStep()*tollerance*time) {
+	int pos = (agents[agent]+1)%path.count();
+	agents[agent] = pos;
+	objective = path[pos];
 	std::cout<<"distance("<<distance.length()<<") motionStep("<<agent->getMotionStep()<<")"<<std::endl;
     }
     agent->move(objective,time);
@@ -39,27 +39,44 @@ void PathBehavior::agentMove(Agent* agent, qreal time)
 
 void PathBehavior::addAgent(Agent* agent)
 {
-
+    agents[agent] = 0;
+    agent->connect(agent,SIGNAL(destroyed(QObject*)),this,SLOT(remAgent(QObject*)));
 }
 
+void PathBehavior::remAgent(QObject* agent)
+{
+    agents.remove(reinterpret_cast<Agent*>(this->sender()));
+    std::cout<<"sender: "<<this->sender()<<
+	     "\nagent:  "<<agent<<std::endl;
+}
+
+
+QWidget* PathBehavior::getBehaviourWidget()
+{
+    return widget;
+}
+
+
 PathBehavior::PathBehavior(QObject* parent): AgentBehavior(parent),
-    tollerance(1)
-{   
+    tollerance(100)
+{
+    widget = new PathBehaviorWidget();
+    
     //questo è un path unico provissorio
     //TODO chiedere all'utente un path
-    path.append(QPointF(2,2));
-    path.append(QPointF(2,5));
-    path.append(QPointF(1,6));
-    path.append(QPointF(0,7));
-    path.append(QPointF(-3,8));
-    path.append(QPointF(-5,6));
-    path.append(QPointF(-5,-6));
-    path.append(QPointF(-4,-7));
-    path.append(QPointF(-3,-7.5));
-    path.append(QPointF(-2,-6.5));
-    path.append(QPointF(-1,-4));
-    path.append(QPointF(-0.5,-2));
-    path.append(QPointF(0,0));
+    path.append(QPointF( +2.0, +2.0 ));
+    path.append(QPointF( +2.0, +5.0 ));
+    path.append(QPointF( +1.0, +6.0 ));
+    path.append(QPointF( +0.0, +7.0 ));
+    path.append(QPointF( -3.0, +8.0 ));
+    path.append(QPointF( -5.0, +6.0 ));
+    path.append(QPointF( -5.0, -6.0 ));
+    path.append(QPointF( -4.0, -7.0 ));
+    path.append(QPointF( -3.0, -7.5 ));
+    path.append(QPointF( -2.0, -6.5 ));
+    path.append(QPointF( -1.0, -4.0 ));
+    path.append(QPointF( -0.5, -2.0 ));
+    path.append(QPointF( +0.0, +0.0 ));
 
 }
 

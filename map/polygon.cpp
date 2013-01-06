@@ -75,15 +75,15 @@ bool Polygon::isInside(QPointF& point)
     return false;
 }
 
-qreal Polygon::area()
+smReal Polygon::area()
 {
     //TODO this only works for a non-self-intersecting (simple) polygon
     #define next(x) ((x+1)%verteces.size())
     
-    qreal sum = 0;
+    smReal sum = 0;
     for (int i=0; i<verteces.size(); i++) {
-	qreal mul1 = verteces[i].x() * verteces[next(i)].y();
-	qreal mul2 = verteces[next(i)].x() * verteces[i].y();
+	smReal mul1 = verteces[i].x() * verteces[next(i)].y();
+	smReal mul2 = verteces[next(i)].x() * verteces[i].y();
 	sum += mul1 - mul2;
     }
     
@@ -102,15 +102,15 @@ QPointF Polygon::getRandomPointInside()
     
     /*
     //this only works for a non-self-intersecting (simple) polygon
-    #define RAND (qrand()/(static_cast<qreal>(RAND_MAX)))
+    #define RAND (qrand()/(static_cast<smReal>(RAND_MAX)))
     #define next(x) ((x+1)%verteces.size())
     
-    qreal randy = RAND;
+    smReal randy = RAND;
 
     randy += boundingBox.bottom();
     randy *= boundingBox.height();
 
-    qreal randx = RAND;
+    smReal randx = RAND;
 
     for (int i=0; i<verteces.size(); i++) {
 	if (verteces[i].y() < )

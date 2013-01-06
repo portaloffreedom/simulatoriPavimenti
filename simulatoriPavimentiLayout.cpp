@@ -1,4 +1,5 @@
 #include "simulatoriPavimenti.h"
+#include <iostream>
 
 void SimulatoriPavimenti::createWidgets()
 {
@@ -22,6 +23,33 @@ void SimulatoriPavimenti::createWidgets()
     behaviourDockWidget->setShown(false);
     logDockWidget = new QDockWidget(tr("Log"),this);
     logDockWidget->setShown(false);
+
+    setDockWidgets();
+}
+
+void SimulatoriPavimenti::setDockWidgets()
+{
+    // behaviourDockWidget
+    behaviourLayout = new QVBoxLayout(behaviourDockWidget);
+    QWidget* behaviourLayoutWidget = new QWidget(behaviourDockWidget);
+    behaviourDockWidget->setWidget(behaviourLayoutWidget);
+    behaviourLayoutWidget->setLayout(behaviourLayout);
+
+    newBehaviourButton = new QPushButton(tr("New Behaviour"));
+    behaviourLayout->addWidget(newBehaviourButton);
+    connect(newBehaviourButton,SIGNAL(clicked()),this,SLOT(addNewBehaviour()));
+    
+    behaviourLayout->addSpacerItem(
+	new QSpacerItem(0,0,QSizePolicy::Minimum,QSizePolicy::MinimumExpanding));
+    
+    // logDockWidget
+    
+}
+
+void SimulatoriPavimenti::newBehaviourAdded(QWidget* behaviourWidget)
+{
+    int pos = behaviourLayout->count() - 2; // 2 -> button and spacer
+    behaviourLayout->insertWidget(pos,behaviourWidget);
 }
 
 void SimulatoriPavimenti::setLayouts()
@@ -78,10 +106,6 @@ void SimulatoriPavimenti::createActions()
     preferencesAct->setShortcut(QKeySequence::Preferences);
     //TODO connect preferencesAct
 
-//     saveAsAct = new QAction(tr("&Save As..."), this);
-//     saveAsAct->setShortcuts(QKeySequence::SaveAs);
-//     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
-
     aboutAct = new QAction(tr("&About"), this);
     //TODO connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
@@ -94,7 +118,6 @@ void SimulatoriPavimenti::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openAct);
-//     fileMenu->addAction(saveAsAct);
     fileMenu->addAction(exitAct);
 
     viewMenu = menuBar()->addMenu(tr("&View"));

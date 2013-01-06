@@ -24,6 +24,7 @@
 #include <QFile>
 #include <qxmlstream.h>
 #include "map.h"
+#include "../service/simulatorePavimentiTypes.h"
 
 // #define MAPREADER_DEBUG
 
@@ -51,25 +52,25 @@ signals:
     void beginBorder(const QString description, const QString id);
     void addBorderPolygon();
     void addBorderPolygonPoint(QPointF point);
-    void addBorderCircle(QPointF center, qreal radius);
+    void addBorderCircle(QPointF center, smReal radius);
     void closeBorder();
     
     void beginEntrance(const QString description, const QString id);
     void addEntrancePolygon();
     void addEntrancePolygonPoint(QPointF point);
-    void addEntranceCircle(QPointF center, qreal radius);
+    void addEntranceCircle(QPointF center, smReal radius);
     void closeEntrance();
     
     void beginExit(const QString description, const QString id);
     void addExitPolygon();
     void addExitPolygonPoint(QPointF point);
-    void addExitCircle(QPointF center, qreal radius);
+    void addExitCircle(QPointF center, smReal radius);
     void closeExit();
     
     void beginObstacle(const QString description, const QString id);
     void addObstaclePolygon();
     void addObstaclePolygonPoint(QPointF point);
-    void addObstacleCircle(QPointF center, qreal radius);
+    void addObstacleCircle(QPointF center, smReal radius);
     void closeObstacle();
     
 private:
@@ -89,11 +90,11 @@ private:
 		bool parseFigure(void (MapReader::*begin)(const QString description, const QString id),
 				 void (MapReader::*addPolygon)(),
 				 void (MapReader::*addPolygonPoint)(QPointF),
-				 void (MapReader::*addCircle)(QPointF center, qreal radius),
+				 void (MapReader::*addCircle)(QPointF center, smReal radius),
 				 void (MapReader::*close)()
 				);
 		    bool parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*addPolygonPoint)(QPointF));
-		    bool parseCircle(void (MapReader::*addCircle)(QPointF center, qreal radius));
+		    bool parseCircle(void (MapReader::*addCircle)(QPointF center, smReal radius));
 	    bool parseSensors();
 		bool parseSensor();
 	bool parseSensorTypes();

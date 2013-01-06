@@ -30,25 +30,25 @@ MapReader::MapReader(QFile &xmlFile)
     connect(this,SIGNAL(beginBorder(QString,QString))  ,map,SLOT(beginBorder(QString,QString))  );
     connect(this,SIGNAL(addBorderPolygon())            ,map,SLOT(addBorderPolygon())            );
     connect(this,SIGNAL(addBorderPolygonPoint(QPointF)),map,SLOT(addBorderPolygonPoint(QPointF)));
-    connect(this,SIGNAL(addBorderCircle(QPointF,qreal)),map,SLOT(addBorderCircle(QPointF,qreal)));
+    connect(this,SIGNAL(addBorderCircle(QPointF,smReal)),map,SLOT(addBorderCircle(QPointF,smReal)));
     connect(this,SIGNAL(closeBorder())                 ,map,SLOT(closeBorder())                 );
 
     connect(this,SIGNAL(beginEntrance(QString,QString))  ,map,SLOT(beginEntrance(QString,QString))  );
     connect(this,SIGNAL(addEntrancePolygon())            ,map,SLOT(addEntrancePolygon())            );
     connect(this,SIGNAL(addEntrancePolygonPoint(QPointF)),map,SLOT(addEntrancePolygonPoint(QPointF)));
-    connect(this,SIGNAL(addEntranceCircle(QPointF,qreal)),map,SLOT(addEntranceCircle(QPointF,qreal)));
+    connect(this,SIGNAL(addEntranceCircle(QPointF,smReal)),map,SLOT(addEntranceCircle(QPointF,smReal)));
     connect(this,SIGNAL(closeEntrance())                  ,map,SLOT(closeEntrance())                );
 
     connect(this,SIGNAL(beginExit(QString,QString))  ,map,SLOT(beginExit(QString,QString))  );
     connect(this,SIGNAL(addExitPolygon())            ,map,SLOT(addExitPolygon())            );
     connect(this,SIGNAL(addExitPolygonPoint(QPointF)),map,SLOT(addExitPolygonPoint(QPointF)));
-    connect(this,SIGNAL(addExitCircle(QPointF,qreal)),map,SLOT(addExitCircle(QPointF,qreal)));
+    connect(this,SIGNAL(addExitCircle(QPointF,smReal)),map,SLOT(addExitCircle(QPointF,smReal)));
     connect(this,SIGNAL(closeExit())                 ,map,SLOT(closeExit())                 );
 
     connect(this,SIGNAL(beginObstacle(QString,QString))  ,map,SLOT(beginObstacle(QString,QString))  );
     connect(this,SIGNAL(addObstaclePolygon())            ,map,SLOT(addObstaclePolygon())            );
     connect(this,SIGNAL(addObstaclePolygonPoint(QPointF)),map,SLOT(addObstaclePolygonPoint(QPointF)));
-    connect(this,SIGNAL(addObstacleCircle(QPointF,qreal)),map,SLOT(addObstacleCircle(QPointF,qreal)));
+    connect(this,SIGNAL(addObstacleCircle(QPointF,smReal)),map,SLOT(addObstacleCircle(QPointF,smReal)));
     connect(this,SIGNAL(closeObstacle())                 ,map,SLOT(closeObstacle())                 );
 
 
@@ -330,7 +330,7 @@ bool MapReader::parseRoom()
 bool MapReader::parseFigure(void (MapReader::*begin)(const QString description, const QString id),
 			    void (MapReader::*addPolygon)(),
 			    void (MapReader::*addPolygonPoint)(QPointF),
-			    void (MapReader::*addCircle)(QPointF center, qreal radius),
+			    void (MapReader::*addCircle)(QPointF center, smReal radius),
 			    void (MapReader::*close)())
 {
     QXmlStreamAttributes attributes = xml.attributes();
@@ -537,12 +537,12 @@ bool MapReader::parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*
     return true;
 }
 
-bool MapReader::parseCircle(void (MapReader::*addCircle)(QPointF center, qreal radius))
+bool MapReader::parseCircle(void (MapReader::*addCircle)(QPointF center, smReal radius))
 {
     QXmlStreamAttributes attributes = xml.attributes();
-    qreal cx = attributes.value("cx").toString().toDouble();
-    qreal cy = attributes.value("cy").toString().toDouble();
-    qreal radius = attributes.value("radius").toString().toDouble();
+    smReal cx = attributes.value("cx").toString().toDouble();
+    smReal cy = attributes.value("cy").toString().toDouble();
+    smReal radius = attributes.value("radius").toString().toDouble();
     
     QPointF center(cx,cy);
     

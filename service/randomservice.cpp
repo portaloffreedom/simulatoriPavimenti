@@ -44,9 +44,9 @@ uint RandomService::randomInt()
     return qrand();
 }
 
-qreal RandomService::randomReal()
+smReal RandomService::randomReal()
 {
-    qreal rand = qrand();
+    smReal rand = qrand();
     rand /= RandMax;
     return rand;
 }
@@ -95,10 +95,10 @@ qreal RandomService::randomReal()
 
 /******************************************************************************/
 //	"Polar" version without trigonometric calls
-qreal RandomService::randn_notrig(qreal mu, qreal sigma) {
+smReal RandomService::randn_notrig(smReal mu, smReal sigma) {
 // 	static bool deviateAvailable=false;	//	flag
 // 	static float storedDeviate;			//	deviate from previous calculation
-	qreal polar, rsquared, var1, var2;
+	smReal polar, rsquared, var1, var2;
 
 	//	If no deviate has been stored, the polar Box-Muller transformation is
 	//	performed, producing two independent normally-distributed random
@@ -108,8 +108,8 @@ qreal RandomService::randn_notrig(qreal mu, qreal sigma) {
 		//	choose pairs of uniformly distributed deviates, discarding those
 		//	that don't fall within the unit circle
 		do {
-			var1=2.0*( qreal(rand())/qreal(RAND_MAX) ) - 1.0;
-			var2=2.0*( qreal(rand())/qreal(RAND_MAX) ) - 1.0;
+			var1=2.0*( smReal(rand())/smReal(RAND_MAX) ) - 1.0;
+			var2=2.0*( smReal(rand())/smReal(RAND_MAX) ) - 1.0;
 			rsquared=var1*var1+var2*var2;
 		} while ( rsquared>=1.0 || rsquared == 0.0);
 
@@ -137,10 +137,10 @@ qreal RandomService::randn_notrig(qreal mu, qreal sigma) {
 //	Standard version with trigonometric calls
 #define PI 3.14159265358979323846
 
-qreal RandomService::randn_trig(qreal mu, qreal sigma) {
+smReal RandomService::randn_trig(smReal mu, smReal sigma) {
 // 	static bool deviateAvailable=false;	//	flag
 // 	static float storedDeviate;			//	deviate from previous calculation
-	qreal dist, angle;
+	smReal dist, angle;
 
 	//	If no deviate has been stored, the standard Box-Muller transformation is
 	//	performed, producing two independent normally-distributed random
@@ -149,8 +149,8 @@ qreal RandomService::randn_trig(qreal mu, qreal sigma) {
 
 		//	choose a pair of uniformly distributed deviates, one for the
 		//	distance and one for the angle, and perform transformations
-		dist=sqrt( -2.0 * log(qreal(rand()) / qreal(RAND_MAX)) );
-		angle=2.0 * PI * (qreal(rand()) / qreal(RAND_MAX));
+		dist=sqrt( -2.0 * log(smReal(rand()) / smReal(RAND_MAX)) );
+		angle=2.0 * PI * (smReal(rand()) / smReal(RAND_MAX));
 
 		//	calculate and store first deviate and set flag
 		storedDeviate=dist*cos(angle);
@@ -168,7 +168,7 @@ qreal RandomService::randn_trig(qreal mu, qreal sigma) {
 	}
 }
 
-qreal RandomService::randomNormal(qreal mu, qreal sigma)
+smReal RandomService::randomNormal(smReal mu, smReal sigma)
 {   
     return this->randn_notrig(mu,sigma);
 }

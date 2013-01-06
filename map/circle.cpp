@@ -30,7 +30,7 @@ Circle::Circle()
 
 }
 
-Circle::Circle(QPointF center, qreal radius)
+Circle::Circle(QPointF center, smReal radius)
 {
     setCenterAndRadius(center,radius);
 }
@@ -48,7 +48,7 @@ void Circle::draw(QPainter& painter)
 
 } 
 
-void Circle::setCenterAndRadius(QPointF center, qreal radius)
+void Circle::setCenterAndRadius(QPointF center, smReal radius)
 {
     this->center.setX(center.rx());
     this->center.setY(center.ry());
@@ -60,9 +60,9 @@ bool Circle::isInside(QPointF& point)
 {
     #define SQR(x)  ((x)*(x))
     
-    qreal distancex = SQR(point.x()-center.x());
-    qreal distancey = SQR(point.y()-center.y());
-    qreal distance = sqrt(distancex+distancey);
+    smReal distancex = SQR(point.x()-center.x());
+    smReal distancey = SQR(point.y()-center.y());
+    smReal distance = sqrt(distancex+distancey);
     if (distance < radius)
 	return true;
     else
@@ -71,7 +71,7 @@ bool Circle::isInside(QPointF& point)
     #undef SQR
 }
 
-qreal Circle::area()
+smReal Circle::area()
 {
     #define SQR(x)  ((x)*(x))
 
@@ -84,13 +84,13 @@ QPointF Circle::getRandomPointInside()
 {
     #define SQR(x) ((x)*(x))
 
-    qreal randy = randomService.randomReal();
+    smReal randy = randomService.randomReal();
     randy *= radius * 2;
     randy -= radius;
 
-    qreal bondx = std::sqrt(SQR(radius)-SQR(randy));
+    smReal bondx = std::sqrt(SQR(radius)-SQR(randy));
 
-    qreal randx = randomService.randomReal();
+    smReal randx = randomService.randomReal();
     randx *= bondx *2;
     randx -= bondx;
 

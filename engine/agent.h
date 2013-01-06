@@ -25,6 +25,7 @@
 #include "agentbehavior.h"
 #include "trafficengine.h"
 #include "../map/spatialobject.h"
+#include "../service/simulatorePavimentiTypes.h"
 
 #define Agent_DEBUG
 
@@ -35,10 +36,10 @@ class Agent : public QObject, public SpatialObject
 {
 Q_OBJECT
 signals:
-    void callMotionSIG(Agent *agent, qreal time);
+    void callMotionSIG(Agent *agent, smReal time);
 
 public slots:
-    void callMotion(qreal time);
+    void callMotion(smReal time);
 
 private:
     AgentBehavior* behavior;
@@ -48,18 +49,18 @@ private:
 #ifdef Agent_DEBUG
     QPointF objective;
 #endif
-    qreal dimensions;
+    smReal dimensions;
 
-//     qreal orientation; //the angle is in radians
+//     smReal orientation; //the angle is in radians
     QPointF orientationV; //unit vector rappresenting the orientation
-    qreal speed;
+    smReal speed;
 
-    qreal maxAccelleration;
-    qreal maxDecelleration;
-    qreal maxSpeed;
-    qreal motionNoise;
+    smReal maxAccelleration;
+    smReal maxDecelleration;
+    smReal maxSpeed;
+    smReal motionNoise;
     
-    qreal getMaxOrientationChange(); /* relative to speed */
+    smReal getMaxOrientationChange(); /* relative to speed */
 
 public:
     Agent(QString name, QString description, QString id, QPointF initialPos,
@@ -68,11 +69,13 @@ public:
 
     /** How far the next near objetive has to be set */
     void draw(QPainter &painter);
-    virtual qreal getMotionStep();
-    void move(QPointF objetive, qreal time);
+    virtual smReal getMotionStep();
+    void move(QPointF objetive, smReal time);
+    void move2(QPointF objetive, smReal time);
     QPointF getPosition();
-    qreal getOrientation();
+    smReal getOrientation();
     QPointF getOrientationV();
+    virtual bool collide(Agent* agent);
 
 };
 

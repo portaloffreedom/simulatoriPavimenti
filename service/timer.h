@@ -28,6 +28,7 @@
 #endif
 
 #include <QtCore/QObject>
+#include "simulatorePavimentiTypes.h"
 
 
 class Timer : public QObject
@@ -39,8 +40,8 @@ public:
     virtual ~Timer();
 
 
-    qreal getElapsedSeconds();
-    qreal getElapsedSecondsAndReset();
+    smRealD getElapsedSeconds();
+    smRealD getElapsedSecondsAndReset();
     
 public slots:
     void reset();

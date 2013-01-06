@@ -29,21 +29,21 @@ class Circle : public Figure
 
 public:
     Circle();
-    Circle(QPointF center, qreal radius);
+    Circle(QPointF center, smReal radius);
     virtual ~Circle();
     
     virtual bool isInside(QPointF& point );
     virtual void draw(QPainter& painter);
 
-    virtual qreal area();
+    virtual smReal area();
     virtual QPointF getRandomPointInside();
     
 public slots:
-    void setCenterAndRadius(QPointF center,qreal radius);
+    void setCenterAndRadius(QPointF center,smReal radius);
     
 private:
     QPointF center;
-    qreal radius;
+    smReal radius;
 };
 
 #endif // CIRCLE_H

@@ -22,7 +22,9 @@
 #define AGENTBEHAVIOR_H
 
 #include <QObject>
+#include <QWidget>
 #include "agent.h"
+#include "../service/simulatorePavimentiTypes.h"
 
 class Agent;
 
@@ -36,7 +38,8 @@ public:
 
 public slots:
     virtual void addAgent(Agent *agent) = 0;
-    virtual void agentMove(Agent *agent, qreal time) = 0;
+    virtual void agentMove(Agent *agent, smReal time) = 0;
+    virtual QWidget* getBehaviourWidget() = 0;
 };
 
 #endif // AGENTBEHAVIOR_H

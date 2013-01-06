@@ -1,5 +1,7 @@
 #include "simulatoriPavimenti.h"
 #include "map/mapreader.h"
+#include "engine/behaviors/pathbehavior.h"
+#include "engine/agentbehavior.h"
 
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
@@ -10,9 +12,10 @@
 #include <QMessageBox>
 #include <QErrorMessage>
 #include <QHBoxLayout>
+#include <QXmlStreamReader>
 
 #include <iostream>
-#include <QXmlStreamReader>
+
 
 SimulatoriPavimenti::SimulatoriPavimenti(QWidget* parent) :
     QMainWindow(parent),
@@ -40,7 +43,7 @@ void SimulatoriPavimenti::open()
 
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("SAX Bookmarks"),
+        QMessageBox::warning(this, tr("XML map"),
                              tr("Cannot read file %1:\n%2.")
                              .arg(fileName)
                              .arg(file.errorString()));
@@ -66,12 +69,14 @@ void SimulatoriPavimenti::getMap(Map* map)
 
     delete this->engine;
     engine = new TrafficEngine(map, 60);
+    //TODO spostare l'hardcode nelle impostazioni
 
     this->centralWidget()->setVisible(true);
 
     connect(playButton,SIGNAL(pressed()),engine,SLOT(start()));
     connect(stepButton,SIGNAL(pressed()),engine,SLOT(singleStep()));
     connect(speedSlider,SIGNAL(valueChanged(int)),engine,SLOT(setSpeed(int)));
+    connect(engine,SIGNAL(newBehaviour(QWidget*)),this,SLOT(newBehaviourAdded(QWidget*)));
 
 }
 
@@ -85,6 +90,14 @@ void SimulatoriPavimenti::printError(QString name, QString description)
     
     std::cerr<<"#ERROR: "<<errorString.toStdString()<<std::endl;
 }
+
+void SimulatoriPavimenti::addNewBehaviour()
+{
+    std::cout<<"cacca"<<std::endl;
+    //TODO crea il nuovo widget
+    engine->addBehavior(new PathBehavior());
+}
+
 
 
 

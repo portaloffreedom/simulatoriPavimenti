@@ -25,6 +25,8 @@
 #include <cmath>
 #include <cstdlib>
 
+#include "simulatorePavimentiTypes.h"
+
 #ifdef WIN32
 #define M_PI 3.14159265358979323846
 #endif
@@ -36,24 +38,24 @@ public:
     RandomService(uint seed);
     ~RandomService();
 
-    qreal randomReal();
+    smReal randomReal();
     uint  randomInt();
-    qreal randomNormal(qreal mu, qreal sigma);
+    smReal randomNormal(smReal mu, smReal sigma);
 
 //     std::mt19937 gen;
-    qreal lastMU;
-    qreal lastSigma;
+    smReal lastMU;
+    smReal lastSigma;
 
 
     static const uint RandMax = RAND_MAX;
     static const uint RandMin = 0;
 
 private:
-    qreal randn_notrig(qreal mu=0.0, qreal sigma=1.0);
-    qreal   randn_trig(qreal mu=0.0, qreal sigma=1.0);
+    smReal randn_notrig(smReal mu=0.0, smReal sigma=1.0);
+    smReal   randn_trig(smReal mu=0.0, smReal sigma=1.0);
     
     bool deviateAvailable;	//flag
-    qreal storedDeviate;	//deviate from previous calculation
+    smReal storedDeviate;	//deviate from previous calculation
 
 };
 

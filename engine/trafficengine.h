@@ -29,6 +29,7 @@
 #include "agentbehavior.h"
 #include "agent.h"
 #include "../service/timer.h"
+#include "../service/simulatorePavimentiTypes.h"
 
 #define ENGINE_DEBUG
 
@@ -44,23 +45,34 @@ private:
     Map *map;
     QTimer *qtimer;
     Timer *timer;
-    qreal fps;
-    qreal speed;
+    smReal fps;
+    smReal speed;
+    uint population;
 
     QVector<AgentBehavior*> behaviorList;
     QList<Agent*> agentList;
 
-    void moveAgents(qreal time);
+    void moveAgents(smReal time);
 
-    QList<qreal> lastFramesDuration;
+    QList<smReal> lastFramesDuration;
+    smReal controlPopulationTimer;
+    smReal totalFrameRenderTime;
+    smReal updatePositionsTimer;
+    smReal repaintGraphicsTimer;
+
+    void controlPopulation(smReal time);
+    void updatePositions(smReal time);
+    void repaintGraphics(smReal time);
 
 public:
-    TrafficEngine(Map *map, qreal fps=std::numeric_limits<double>::infinity());
+    TrafficEngine(Map *map, smReal fps=std::numeric_limits<double>::infinity());
     virtual ~TrafficEngine();
 
-    qreal getFps();
-    qreal getFrameDuration();
+    smReal getFps();
+    smReal getFrameDuration();
 
+signals:
+    void newBehaviour(QWidget* widgetBehaviour);
     
 public slots:
     void start();
@@ -73,6 +85,8 @@ public slots:
 
 private slots:
     void drawAgents(QPainter &painter);
+    void drawDebugInfo(QPainter &painter);
+    bool agentCollideAgent(Agent* agent);
 };
 
 #endif // TRAFFICENGINE_H

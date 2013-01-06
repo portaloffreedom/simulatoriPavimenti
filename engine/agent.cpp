@@ -38,19 +38,21 @@ Agent::Agent(QString name, QString description, QString id, QPointF initialPos,
 //     this->orientation = 0;
     this->speed = 0;
     this->dimensions = 0.5;
-    this->maxSpeed = 3;
-    this->motionNoise = .05;
-
+    this->maxSpeed = 30;
+    this->motionNoise = 0.5;
+    this->maxAccelleration = 1;
+    this->maxDecelleration = -1;
+    
     this->behavior = behavior;
     behavior->addAgent(this);
-    connect(this,SIGNAL(callMotionSIG(Agent*,qreal)),behavior,SLOT(agentMove(Agent*,qreal)));
+    connect(this,SIGNAL(callMotionSIG(Agent*,smReal)),behavior,SLOT(agentMove(Agent*,smReal)));
 }
 
 Agent::~Agent()
 {
 
 }
-void Agent::callMotion(qreal time)
+void Agent::callMotion(smReal time)
 {
     emit callMotionSIG(this, time);
 }
@@ -68,9 +70,9 @@ void Agent::draw(QPainter &painter)
 #endif
 }
 
-qreal Agent::getMotionStep()
+smReal Agent::getMotionStep()
 {
-    qreal frame = trafficengine->getFrameDuration();
+    smReal frame = trafficengine->getFrameDuration();
     return speed*frame;
     
 }
@@ -94,56 +96,107 @@ inline void PARAMETERSPrintPoint(const std::string &description, QPointF point) 
     std::cout<<description<<"( "<<point.x()<<" : "<<point.y()<<" )"<<std::endl;
 }
 
-qreal Agent::getOrientation()
+smReal Agent::getOrientation()
 {
-    qreal orientation = acos(orientationV.x());
+    smReal orientation = acos(orientationV.x());
     PARAMETERSPrintPoint("PARAMETERS: orientation",QPointF(orientation,asin(orientationV.y())));
     
     return orientation;
 }
 
-void Agent::move(QPointF objetive, qreal time)
+void Agent::move(QPointF objetive, smReal time)
 {
 #define SQR(x) ((x)*(x))
-    
-    //TODO try to move near
-    
 #ifdef Agent_DEBUG
     this->objective = objetive;
 #endif
 
     QPointF position = this->getPosition();
-    qreal   currentSpeed = this->maxSpeed; //TODO temporary constant speed
+
+    smReal newSpeed = (maxAccelleration*time)+speed;
+    if (newSpeed >= maxSpeed)
+	newSpeed = maxSpeed;
+    smReal acceleration = (newSpeed-speed)/time;
+
+    this->orientationV = objetive-position;
+    orientationV /= sqrt(SQR(orientationV.x())+SQR(orientationV.y()));
+
+    smReal linearMove = speed*time + .5*(acceleration*SQR(time));
+    QPointF move = linearMove*orientationV;
+
+    move.setY(randomService.randomNormal(move.y(),this->motionNoise*linearMove));
+    move.setX(randomService.randomNormal(move.x(),this->motionNoise*linearMove));
+
+    this->speed = newSpeed;
+    this->position = position+move;
+#undef SQR
+
+#ifdef Agent_DEBUG
+//     getOrientation();
+#endif
+    
+}
+
+void Agent::move2(QPointF objetive, smReal time)
+{
+#define SQR(x) ((x)*(x))
+#ifdef Agent_DEBUG
+    this->objective = objetive;
+#endif
+
+    QPointF position = this->getPosition();
+//     smReal   currentSpeed = this->maxSpeed; //TODO temporary constant speed
+    if (speed > maxSpeed)
+	speed = maxSpeed;
     QPointF distanceVect = objetive-position;
     QLineF  distanceLine(position,objetive);
-    qreal   moveCount = distanceLine.length()/(currentSpeed*time);
+    smReal   moveCount = distanceLine.length()/(maxSpeed*time);
 
     QPointF move = distanceVect/moveCount;
-    move.setY(randomService.randomNormal(move.y(),this->motionNoise));
-    move.setX(randomService.randomNormal(move.x(),this->motionNoise));
     QPointF newPosition = position+move;
 
 
     //update orientation, speed and new position
-    this->speed = QLineF(position,newPosition).length()/(time); /* u/s */
+    smReal newSpeed = QLineF(position,newPosition).length()/(time); /* u/s */
     this->orientationV = move;
     orientationV /= sqrt(SQR(orientationV.x())+SQR(orientationV.y()));
-    
+
+    if ( (newSpeed-speed)/time > maxAccelleration ) {
+	newSpeed = (maxAccelleration*time)+speed;
+	if (newSpeed > maxSpeed)
+	    newSpeed = maxSpeed;
+	smReal newMove = speed*time + .5*(maxAccelleration*SQR(speed));
+	move = orientationV*newMove;
+    }
+//     else if ( (newSpeed-speed)/time < maxDecelleration ) {
+// 	newSpeed =  (maxDecelleration*time)+speed;
+// 	if (newSpeed > maxSpeed)
+// 	    newSpeed = maxSpeed;
+// 	smReal newMove = speed*time + .5*(maxDecelleration*SQR(speed));
+// 	move = orientationV*newMove;
+// 	newPosition = position+move;
+//     }
+
+//     move.setY(randomService.randomNormal(move.y(),this->motionNoise*time));
+//     move.setX(randomService.randomNormal(move.x(),this->motionNoise*time));
+    newPosition = position+move;
+
+    this->speed = newSpeed;
     this->position = newPosition;
 #undef SQR
 
 #ifdef Agent_DEBUG
-    getOrientation();
+//     getOrientation();
 #endif
-    
-//     std::cout<<"###############\n";
-//     PARAMETERSPrintPoint("position", this->getPosition());
-//     PARAMETERSPrintVal<qreal>("speed",this->speed);
-//     PARAMETERSPrintVal<uint>("PARAMETERS: time",time);
-//     PARAMETERSPrintVal<qreal>("PARAMETERS: distanceLine.length",distanceLine.length());
-//     PARAMETERSPrintVal<qreal>("PARAMETERS: moveCount",moveCount);
-//     PARAMETERSPrintPoint("PARAMETERS: distanceVect",distanceVect);
-//     PARAMETERSPrintPoint("PARAMETERS: move",move);
+
 }
 
+bool Agent::collide(Agent* agent)
+{
+    QLineF distance(this->position,agent->position);
+    if (distance.length() <= (this->dimensions+agent->dimensions))
+	return true;
+    else
+	return false;
+}
 

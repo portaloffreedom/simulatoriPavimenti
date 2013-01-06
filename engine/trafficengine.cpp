@@ -21,29 +21,41 @@
 #include "trafficengine.h"
 #include "behaviors/defaultbehavior.h"
 #include "behaviors/pathbehavior.h"
+#include "../service/randomservice.h"
 #include <iostream>
+#include <cmath>
 
-TrafficEngine::TrafficEngine(Map* map, qreal fps) :
+TrafficEngine::TrafficEngine(Map* map, smReal fps) :
     map(map),
     fps(fps),
-    speed(1.0)
+    speed(1.0),
+    population(30)
 {
     this->qtimer = new QTimer(this);
     this->timer = new Timer(this);
-    this->addBehavior(new PathBehavior(this));
+//     this->addBehavior(new PathBehavior(this));
     this->lastFramesDuration.append(1);
 
     connect(qtimer,SIGNAL(timeout()),this,SLOT(step()));
     connect(map,SIGNAL(isDrawing(QPainter&)),this,SLOT(drawAgents(QPainter&)));
+#ifdef ENGINE_DEBUG
+    connect(map,SIGNAL(isDrawing(QPainter&)),this,SLOT(drawDebugInfo(QPainter&)));
+#endif
 
-    this->createAgent();
+//     this->createAgent();
 }
+
+
+
 
 TrafficEngine::~TrafficEngine()
 {
     delete this->map;
 //     this->~QObject();
 }
+
+
+
 
 void TrafficEngine::start()
 {
@@ -55,15 +67,56 @@ void TrafficEngine::start()
     }
 }
 
+
+
+
+//TODO decisamente da migliorare con tanti parametri
+void TrafficEngine::controlPopulation(smReal time)
+{
+    uint totalPopulation = agentList.size();
+//     smReal populationToAdd = population - totalPopulation;
+//     populationToAdd = randomService.randomNormal(population,std::abs(populationToAdd/2));
+    smReal population = randomService.randomNormal(this->population,1);
+    smReal populationToAdd = (population - totalPopulation);
+
+    //If the population is enought, don't add anyone
+    for (int i=1; i<populationToAdd; i++) {
+	this->createAgent();
+    }
+}
+
+
+
+void TrafficEngine::updatePositions(smReal time)
+{
+    this->moveAgents(time*speed);
+}
+
+
+
+
+void TrafficEngine::repaintGraphics(smReal time)
+{
+    this->map->repaint();
+}
+
+
+
+
 void TrafficEngine::step()
 {
-    qreal passedTime = timer->getElapsedSecondsAndReset();
+    smReal passedTime = timer->getElapsedSecondsAndReset();
+
+    this->controlPopulation(passedTime);
+	smReal controlPopulationTimer = timer->getElapsedSeconds();
+    this->updatePositions(passedTime);
+	smReal updatePositionsTimer = timer->getElapsedSeconds() - controlPopulationTimer;
+    this->repaintGraphics(passedTime);
+	this->controlPopulationTimer = controlPopulationTimer;
+	this->updatePositionsTimer = updatePositionsTimer;
+	totalFrameRenderTime = timer->getElapsedSeconds();
+	repaintGraphicsTimer = totalFrameRenderTime - this->updatePositionsTimer;
     
-    this->moveAgents(passedTime*speed);
-
-    //paint the result
-    this->map->repaint();
-
     if (lastFramesDuration.size() > 10)
 	this->lastFramesDuration.pop_front();
     this->lastFramesDuration.append(passedTime);
@@ -72,9 +125,11 @@ void TrafficEngine::step()
 void TrafficEngine::singleStep()
 {
     qWarning("attenzione questa azione ancora non funziona bene");
-    qreal passedTime = speed;
-    this->moveAgents(passedTime);
-    this->map->repaint();
+    smReal passedTime = speed;
+    
+    this->controlPopulation(passedTime);
+    this->updatePositions(passedTime);
+    this->repaintGraphics(passedTime);
 }
 
 
@@ -87,6 +142,11 @@ void TrafficEngine::createAgent(AgentBehavior* behavior)
 {
     QPointF position = map->getEntrancePoint();
     Agent* agent = new Agent("ciccio","","a1",position,this,behavior,this);
+
+    if (agentCollideAgent(agent)) {
+	delete agent;
+	return;
+    }
     this->agentList.append(agent);
 }
 
@@ -94,10 +154,11 @@ int TrafficEngine::addBehavior(AgentBehavior* behavior)
 {
     int pos = behaviorList.size();
     this->behaviorList.append(behavior);
+    emit newBehaviour(behavior->getBehaviourWidget());
     return pos;
 }
 
-void TrafficEngine::moveAgents(qreal time)
+void TrafficEngine::moveAgents(smReal time)
 {
     Agent *agent;
     foreach(agent,agentList) {
@@ -109,13 +170,6 @@ void TrafficEngine::moveAgents(qreal time)
 void TrafficEngine::drawAgents(QPainter& painter)
 {
     painter.save();
-    #ifdef ENGINE_DEBUG
-    painter.save();
-    painter.resetTransform();
-    int fontSize = painter.font().pointSize();
-    painter.drawText(2,fontSize*2,QString("fps: ").append(QString::number(this->getFps())));
-    painter.restore();
-    #endif
 
     painter.setPen(QPen(Qt::magenta));
     painter.setBrush(QBrush(Qt::magenta));
@@ -127,18 +181,44 @@ void TrafficEngine::drawAgents(QPainter& painter)
     painter.restore();
 }
 
-qreal TrafficEngine::getFps()
+void TrafficEngine::drawDebugInfo(QPainter& painter)
 {
-    qreal value, sum=0;
+    painter.save();
+    painter.resetTransform();
+
+    int fontSize = painter.font().pointSize();
+    painter.translate(2,fontSize*2);
+    painter.drawText(0,0,QString("fps: ").append(QString::number(this->getFps())));
+
+    painter.setPen(Qt::darkGreen);
+    painter.translate(5,fontSize);
+    painter.scale(.7,.7);
+    
+//     painter.translate(0,fontSize*2);
+    painter.drawText(0,fontSize*2,QString("Total: ").append(QString::number(this->totalFrameRenderTime)));
+//     painter.translate(0,fontSize*2);
+    painter.drawText(0,fontSize*4,QString("controlPopulation: ").append(QString::number(this->controlPopulationTimer)));
+//     painter.translate(0,fontSize*2);
+    painter.drawText(0,fontSize*6,QString("updatePositions: ").append(QString::number(this->updatePositionsTimer)));
+//     painter.translate(0,fontSize*2);
+    painter.drawText(0,fontSize*8,QString("repaint: ").append(QString::number(this->repaintGraphicsTimer)));
+
+    painter.restore();
+}
+
+
+smReal TrafficEngine::getFps()
+{
+    smReal value, sum=0;
     foreach(value, lastFramesDuration) {
 	sum += 1/value;
     }
     return sum/lastFramesDuration.size();
 }
 
-qreal TrafficEngine::getFrameDuration()
+smReal TrafficEngine::getFrameDuration()
 {
-    qreal value, sum=0;
+    smReal value, sum=0;
     foreach(value, lastFramesDuration) {
 	sum += value;
     }
@@ -152,3 +232,12 @@ void TrafficEngine::setSpeed(int speed)
 //     std::cout<<this->speed<<" = "<<speed<<"/(1000.*100.)"<<std::endl;
 }
 
+bool TrafficEngine::agentCollideAgent(Agent* agent)
+{
+    Agent *otherAgent;
+    foreach(otherAgent,agentList) {
+	if (agent->collide(otherAgent))
+	    return true;
+    }
+    return false;
+}
