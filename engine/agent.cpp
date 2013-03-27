@@ -28,11 +28,12 @@ Agent::Agent(QString name, QString description, QString id, QPointF initialPos,
 	     TrafficEngine *trafficEngine, AgentBehavior* behavior, QObject* parent) :
     QObject(parent),
     SpatialObject(name,description,id),
+    #ifdef Agent_DEBUG
+    hadCrash(false),
+    #endif
     position(initialPos),
     trafficengine(trafficEngine),
-#ifdef Agent_DEBUG
     objective(initialPos),
-#endif
     orientationV(1,0)
 {
 //     this->orientation = 0;
@@ -41,7 +42,7 @@ Agent::Agent(QString name, QString description, QString id, QPointF initialPos,
     this->maxSpeed = 30;
     this->motionNoise = 0.5;
     this->maxAccelleration = 1;
-    this->maxDecelleration = -1;
+    this->maxDecelleration = -10;
     
     this->behavior = behavior;
     behavior->addAgent(this);
@@ -59,6 +60,13 @@ void Agent::callMotion(smReal time)
 
 void Agent::draw(QPainter &painter)
 {
+#ifdef Agent_DEBUG
+    painter.save();
+    if (hadCrash) {
+	painter.setBrush(Qt::red);
+	hadCrash = false;
+    }
+#endif
     painter.drawEllipse(position,dimensions,dimensions);
 #ifdef Agent_DEBUG
     painter.save();
@@ -66,6 +74,7 @@ void Agent::draw(QPainter &painter)
     painter.drawEllipse(objective,dimensions,dimensions);
     painter.drawLine(position,position+(orientationV*dimensions*2));
     painter.drawLine(position,objective);
+    painter.restore();
     painter.restore();
 #endif
 }
@@ -107,26 +116,61 @@ smReal Agent::getOrientation()
 void Agent::move(QPointF objetive, smReal time)
 {
 #define SQR(x) ((x)*(x))
-#ifdef Agent_DEBUG
     this->objective = objetive;
-#endif
 
     QPointF position = this->getPosition();
 
+    // accellerate to new speed
     smReal newSpeed = (maxAccelleration*time)+speed;
+
+    //control if maxSpeed is reached
     if (newSpeed >= maxSpeed)
 	newSpeed = maxSpeed;
+
+    // update new orientation
+    QPointF newOrientationV = objetive-position;
+    newOrientationV /= sqrt(SQR(newOrientationV.x())+SQR(newOrientationV.y()));
+
+    //control orientation accelleration
+    QPointF orientationChangeV = newOrientationV-orientationV;
+    smReal orientationChange = (SQR(orientationChangeV.x())+SQR(orientationChangeV.y()))/time;
+
+    //control orientation change over speed
+    if (orientationChange * newSpeed > maxSpeed)
+	newSpeed = maxSpeed / orientationChange;
+
+
+    //calculate new accelleration in relation of new speed
     smReal acceleration = (newSpeed-speed)/time;
+    
+    //control orientation accelleration
+    if (acceleration < maxDecelleration) {
+	acceleration = maxDecelleration;
+	newSpeed = (acceleration*time)+speed;
+	
+	orientationChangeV /= orientationChange; //normalize vector
+	orientationChange = maxSpeed / newSpeed;
+	orientationChangeV *= orientationChange;
 
-    this->orientationV = objetive-position;
-    orientationV /= sqrt(SQR(orientationV.x())+SQR(orientationV.y()));
+	newOrientationV = orientationChangeV+orientationV;
+    }
 
+
+    //calculate new position (using the "Equations of motion")
     smReal linearMove = speed*time + .5*(acceleration*SQR(time));
-    QPointF move = linearMove*orientationV;
+    QPointF move = linearMove*newOrientationV;
 
+    //add noise to the movement
     move.setY(randomService.randomNormal(move.y(),this->motionNoise*linearMove));
     move.setX(randomService.randomNormal(move.x(),this->motionNoise*linearMove));
 
+    // Save old agent state for revert movement
+    this->oldOrientationV = this->orientationV;
+    this->oldSpeed = this->speed;
+    this->oldPosition = this->position;
+    
+    // UPDATE new agent properties
+    this->orientationV = newOrientationV;
     this->speed = newSpeed;
     this->position = position+move;
 #undef SQR
@@ -137,66 +181,32 @@ void Agent::move(QPointF objetive, smReal time)
     
 }
 
-void Agent::move2(QPointF objetive, smReal time)
-{
-#define SQR(x) ((x)*(x))
-#ifdef Agent_DEBUG
-    this->objective = objetive;
-#endif
-
-    QPointF position = this->getPosition();
-//     smReal   currentSpeed = this->maxSpeed; //TODO temporary constant speed
-    if (speed > maxSpeed)
-	speed = maxSpeed;
-    QPointF distanceVect = objetive-position;
-    QLineF  distanceLine(position,objetive);
-    smReal   moveCount = distanceLine.length()/(maxSpeed*time);
-
-    QPointF move = distanceVect/moveCount;
-    QPointF newPosition = position+move;
-
-
-    //update orientation, speed and new position
-    smReal newSpeed = QLineF(position,newPosition).length()/(time); /* u/s */
-    this->orientationV = move;
-    orientationV /= sqrt(SQR(orientationV.x())+SQR(orientationV.y()));
-
-    if ( (newSpeed-speed)/time > maxAccelleration ) {
-	newSpeed = (maxAccelleration*time)+speed;
-	if (newSpeed > maxSpeed)
-	    newSpeed = maxSpeed;
-	smReal newMove = speed*time + .5*(maxAccelleration*SQR(speed));
-	move = orientationV*newMove;
-    }
-//     else if ( (newSpeed-speed)/time < maxDecelleration ) {
-// 	newSpeed =  (maxDecelleration*time)+speed;
-// 	if (newSpeed > maxSpeed)
-// 	    newSpeed = maxSpeed;
-// 	smReal newMove = speed*time + .5*(maxDecelleration*SQR(speed));
-// 	move = orientationV*newMove;
-// 	newPosition = position+move;
-//     }
-
-//     move.setY(randomService.randomNormal(move.y(),this->motionNoise*time));
-//     move.setX(randomService.randomNormal(move.x(),this->motionNoise*time));
-    newPosition = position+move;
-
-    this->speed = newSpeed;
-    this->position = newPosition;
-#undef SQR
-
-#ifdef Agent_DEBUG
-//     getOrientation();
-#endif
-
-}
-
 bool Agent::collide(Agent* agent)
 {
-    QLineF distance(this->position,agent->position);
-    if (distance.length() <= (this->dimensions+agent->dimensions))
+    #define SQR(x) ((x)*(x))
+    //QLineF distance(this->position,agent->position);
+    float distance = sqrt(
+	SQR( this->position.x() - agent->position.x() ) +
+	SQR( this->position.y() - agent->position.y() )
+    );
+    
+    if (distance <= (this->dimensions+agent->dimensions))
 	return true;
     else
 	return false;
+    #undef SQR
 }
 
+void Agent::revertMovement()
+{
+    this->orientationV = this->oldOrientationV;
+    this->position = this->oldPosition;
+    this->speed = this->oldSpeed;
+}
+
+#ifdef Agent_DEBUG
+void Agent::setCrash()
+{
+    hadCrash = true;
+}
+#endif

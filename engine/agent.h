@@ -45,10 +45,12 @@ private:
     AgentBehavior* behavior;
     TrafficEngine* trafficengine;
     
+    QPointF oldPosition;
+    QPointF oldOrientationV;
+    smReal oldSpeed;
+    
     QPointF position;
-#ifdef Agent_DEBUG
     QPointF objective;
-#endif
     smReal dimensions;
 
 //     smReal orientation; //the angle is in radians
@@ -59,6 +61,10 @@ private:
     smReal maxDecelleration;
     smReal maxSpeed;
     smReal motionNoise;
+
+    #ifdef Agent_DEBUG
+    bool hadCrash;
+    #endif
     
     smReal getMaxOrientationChange(); /* relative to speed */
 
@@ -67,16 +73,23 @@ public:
 	  TrafficEngine *trafficengine, AgentBehavior* behavior, QObject* parent = 0);
     virtual ~Agent();
 
-    /** How far the next near objetive has to be set */
     void draw(QPainter &painter);
-    virtual smReal getMotionStep();
     void move(QPointF objetive, smReal time);
-    void move2(QPointF objetive, smReal time);
+    /** Revert last movement made from "move" function */
+    void revertMovement();
+    /** Returns true if the agents collides */
+    static bool collide(Agent* a, Agent *b);
+    
+    /** How far the next near objetive has to be set */
+    virtual smReal getMotionStep();
+    virtual bool collide(Agent* agent);
+    
     QPointF getPosition();
     smReal getOrientation();
     QPointF getOrientationV();
-    virtual bool collide(Agent* agent);
-
+    #ifdef Agent_DEBUG
+    void setCrash();
+    #endif
 };
 
 #endif // AGENT_H

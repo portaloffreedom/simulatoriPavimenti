@@ -49,7 +49,7 @@ private:
     smReal speed;
     uint population;
 
-    QVector<AgentBehavior*> behaviorList;
+    QList<AgentBehavior*> behaviorList;
     QList<Agent*> agentList;
 
     void moveAgents(smReal time);
@@ -61,6 +61,8 @@ private:
     smReal repaintGraphicsTimer;
 
     void controlPopulation(smReal time);
+    void controlCollisions();
+    void solveCollision(Agent *a, Agent *b);
     void updatePositions(smReal time);
     void repaintGraphics(smReal time);
 

@@ -29,7 +29,7 @@ TrafficEngine::TrafficEngine(Map* map, smReal fps) :
     map(map),
     fps(fps),
     speed(1.0),
-    population(30)
+    population(5)
 {
     this->qtimer = new QTimer(this);
     this->timer = new Timer(this);
@@ -160,10 +160,19 @@ int TrafficEngine::addBehavior(AgentBehavior* behavior)
 
 void TrafficEngine::moveAgents(smReal time)
 {
+    //TODO prova a muovere tutti
     Agent *agent;
     foreach(agent,agentList) {
 	agent->callMotion(time);
     }
+   
+    //TODO risoluzione collisioni
+    controlCollisions();
+    
+//     Agent *agent;
+//     foreach(agent,agentList) {
+// 	agent->callMotion(time);
+//     }
 
 }
 
@@ -206,6 +215,34 @@ void TrafficEngine::drawDebugInfo(QPainter& painter)
     painter.restore();
 }
 
+void TrafficEngine::controlCollisions()
+{
+    int collisions = 1;
+    
+    while (collisions > 0){
+	collisions = 0;
+	
+	//TODO controllo collisioni con gli oggetti statici
+	
+	// controllo collisioni tra gli agenti
+	for(int i=0; i<agentList.size(); i++){
+	    Agent *agentA = agentList[i];
+	    
+	    for (int j=i+1; j<agentList.size(); j++){
+		Agent *agentB = agentList[j];
+		
+		if (agentA->collide(agentB)) {
+		    solveCollision(agentA,agentB);
+		    collisions++;
+		}
+	    }
+	}
+	std::cout<<"Collisions: "<<collisions<<std::endl;
+	//collisions = 0;
+    }
+}
+
+
 
 smReal TrafficEngine::getFps()
 {
@@ -241,3 +278,15 @@ bool TrafficEngine::agentCollideAgent(Agent* agent)
     }
     return false;
 }
+
+void TrafficEngine::solveCollision(Agent* a, Agent* b)
+{
+    #ifdef Agent_DEBUG
+    a->setCrash();
+    b->setCrash();
+    #endif
+    a->revertMovement();
+    b->revertMovement();    
+    //TODO solve collision
+}
+

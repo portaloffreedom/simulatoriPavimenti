@@ -6,8 +6,12 @@
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
-    SimulatoriPavimenti *foo = new SimulatoriPavimenti();
-    foo->show();
-    QErrorMessage::qtHandler();
+    SimulatoriPavimenti *mainWindow = new SimulatoriPavimenti();
+//     app.connect(foo,SIGNAL(onClose()),&app,SLOT(quit()));
+    mainWindow->show();
+
+    //sposta il debug dal terminale a finestre grafiche
+    QErrorMessage::qtHandler();  
+
     return app.exec();
 }

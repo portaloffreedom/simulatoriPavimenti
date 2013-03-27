@@ -19,18 +19,20 @@
 
 
 #include "pathbehavior.h"
+#include "../service/randomservice.h"
 #include <QLineF>
 #include <iostream>
 
 void PathBehavior::agentMove(Agent* agent, smReal time)
 {    
     QPointF currentPos = agent->getPosition();
-    QPointF objective = path[agents[agent]];
+    QPointF objective = agents[agent].objective;
     QLineF distance = QLineF(currentPos,objective);
     if (distance.length() < agent->getMotionStep()*tollerance*time) {
-	int pos = (agents[agent]+1)%path.count();
-	agents[agent] = pos;
-	objective = path[pos];
+	int pos = (agents[agent].position+1)%path.count();
+	AgentObjective objectiveInfo = getObjective(pos);
+	agents[agent] = objectiveInfo;
+	objective = objectiveInfo.objective;
 	std::cout<<"distance("<<distance.length()<<") motionStep("<<agent->getMotionStep()<<")"<<std::endl;
     }
     agent->move(objective,time);
@@ -39,13 +41,28 @@ void PathBehavior::agentMove(Agent* agent, smReal time)
 
 void PathBehavior::addAgent(Agent* agent)
 {
-    agents[agent] = 0;
+    agents[agent] = getObjective(0);
     agent->connect(agent,SIGNAL(destroyed(QObject*)),this,SLOT(remAgent(QObject*)));
 }
 
+PathBehavior::AgentObjective PathBehavior::getObjective(int pos)
+{
+    AgentObjective agentObjective;
+    agentObjective.position = pos;
+
+    agentObjective.objective = path[pos];
+    QPointF objectiveNoise = noise[pos];
+    agentObjective.objective.setX(randomService.randomNormal(agentObjective.objective.x(),objectiveNoise.x()));
+    agentObjective.objective.setY(randomService.randomNormal(agentObjective.objective.y(),objectiveNoise.y()));
+    
+    return agentObjective;
+}
+
+
 void PathBehavior::remAgent(QObject* agent)
 {
-    agents.remove(reinterpret_cast<Agent*>(this->sender()));
+//     delete agents[reinterpret_cast<Agent*>(agent)];
+    agents.remove(reinterpret_cast<Agent*>(agent));
     std::cout<<"sender: "<<this->sender()<<
 	     "\nagent:  "<<agent<<std::endl;
 }
@@ -58,25 +75,39 @@ QWidget* PathBehavior::getBehaviourWidget()
 
 
 PathBehavior::PathBehavior(QObject* parent): AgentBehavior(parent),
-    tollerance(100)
+    tollerance(500)
 {
     widget = new PathBehaviorWidget();
+    qreal STDnoise = +0.1;
     
-    //questo è un path unico provissorio
+    //questo è un path unico provvisorio
     //TODO chiedere all'utente un path
     path.append(QPointF( +2.0, +2.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( +2.0, +5.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( +1.0, +6.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( +0.0, +7.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( -3.0, +8.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( -5.0, +6.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( -5.0, -6.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( -4.0, -7.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( -3.0, -7.5 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( -2.0, -6.5 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( -1.0, -4.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( -0.5, -2.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
     path.append(QPointF( +0.0, +0.0 ));
+    noise.append(QPointF( STDnoise, STDnoise ));
 
 }
 

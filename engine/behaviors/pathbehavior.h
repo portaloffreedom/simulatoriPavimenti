@@ -35,10 +35,20 @@ Q_OBJECT
 
 private:
     QVector<QPointF> path;
+    QVector<QPointF> noise;
+    
     const smReal tollerance;
     PathBehaviorWidget* widget;
-    
-    QMap<Agent*,int> agents;
+
+    struct AgentObjective {
+	int position;
+	QPointF objective;
+    };
+
+    QMap<Agent*,AgentObjective> agents;
+
+    //methods
+    AgentObjective getObjective (int pos);
     
 public slots:
     virtual void agentMove(Agent* agent, smReal time);
