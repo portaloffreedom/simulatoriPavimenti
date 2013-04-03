@@ -62,6 +62,11 @@ private:
     QDockWidget* logDockWidget;
     
 
+protected:
+    virtual void closeEvent(QCloseEvent* );    
+
+signals:
+    void quitting();
 
 public:
     SimulatoriPavimenti(QWidget *parent = 0);

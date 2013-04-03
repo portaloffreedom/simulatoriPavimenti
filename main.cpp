@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
     SimulatoriPavimenti *mainWindow = new SimulatoriPavimenti();
-//     app.connect(foo,SIGNAL(onClose()),&app,SLOT(quit()));
+    app.connect(mainWindow, SIGNAL(quitting()), &app, SLOT(quit()));
     mainWindow->show();
 
     //sposta il debug dal terminale a finestre grafiche

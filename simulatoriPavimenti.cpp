@@ -31,6 +31,12 @@ SimulatoriPavimenti::SimulatoriPavimenti(QWidget* parent) :
 SimulatoriPavimenti::~SimulatoriPavimenti()
 {}
 
+void SimulatoriPavimenti::closeEvent(QCloseEvent* event)
+{
+    QWidget::closeEvent(event);
+    emit quitting();
+}
+
 
 void SimulatoriPavimenti::open()
 {
