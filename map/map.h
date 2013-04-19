@@ -21,17 +21,19 @@
 #define MAP_H
 
 #include <QWidget>
+//#include <QGLWidget>
 #include <QEvent>
 #include "figure.h"
 #include "spatialobject.h"
 #include "../service/simulatorePavimentiTypes.h"
+#include "../service/settingswidget.h"
 
 
 class Map : public QWidget
 {
 Q_OBJECT
 public:
-    Map();
+    Map(SettingsWidget* settingswidget);
     virtual ~Map();
 
     QPointF getEntrancePoint();
@@ -72,6 +74,8 @@ protected:
     
 private:
 
+    SettingsWidget *settingswidget;
+    
     smReal   leftConstraint;
     smReal  rightConstraint;
     smReal    topConstraint;

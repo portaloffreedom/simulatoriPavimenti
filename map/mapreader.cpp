@@ -22,10 +22,10 @@
 #include <iostream>
 #include <QString>
 
-MapReader::MapReader(QFile &xmlFile)
+MapReader::MapReader(QFile &xmlFile, SettingsWidget * settingswidget)
 {
     this->xmlFile = &xmlFile;
-    map = new Map();
+    map = new Map(settingswidget);
 
     connect(this,SIGNAL(beginBorder(QString,QString))  ,map,SLOT(beginBorder(QString,QString))  );
     connect(this,SIGNAL(addBorderPolygon())            ,map,SLOT(addBorderPolygon())            );

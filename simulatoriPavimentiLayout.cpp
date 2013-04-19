@@ -25,6 +25,8 @@ void SimulatoriPavimenti::createWidgets()
     logDockWidget->setShown(false);
 
     setDockWidgets();
+    
+    this->settingswidget = new SettingsWidget(this);
 }
 
 void SimulatoriPavimenti::setDockWidgets()
@@ -104,7 +106,7 @@ void SimulatoriPavimenti::createActions()
     //Settings Menu
     preferencesAct = new QAction(tr("&Preferences"),this);
     preferencesAct->setShortcut(QKeySequence::Preferences);
-    //TODO connect preferencesAct
+    connect(preferencesAct,SIGNAL(triggered()),settingswidget,SLOT(show()));
 
     aboutAct = new QAction(tr("&About"), this);
     //TODO connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));

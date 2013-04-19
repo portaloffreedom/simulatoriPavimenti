@@ -58,7 +58,7 @@ void SimulatoriPavimenti::open()
 
     std::cout<<"file scelto: "<<fileName.toStdString()<<std::endl;
 
-    MapReader mapreader(file);
+    MapReader mapreader(file, this->settingswidget);
     connect(&mapreader,SIGNAL(finished(Map*)),this,SLOT(getMap(Map*)));
     connect(&mapreader,SIGNAL(error(QString,QString)),this,SLOT(printError(QString,QString)));
     mapreader.parse();

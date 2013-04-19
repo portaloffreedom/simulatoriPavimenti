@@ -28,8 +28,10 @@
 
 char Map::version[] = "0.2";
 
-Map::Map()
+Map::Map(SettingsWidget *settingswidget) 
+    :settingswidget(settingswidget)
 {   
+    //TODO cambiare le costanti con massimo e minimo dei float
     this->leftConstraint = 1.0e70;
     this->rightConstraint = -1.0e70;
     this->topConstraint = -1.0e70;
@@ -74,7 +76,7 @@ void Map::paintEvent(QPaintEvent* event)
     
     QPainter painter;
     painter.begin(this);
-    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHints(settingswidget->getRenderingHint());
     painter.save();
     
     //draw ---------------------------------------------------------------------

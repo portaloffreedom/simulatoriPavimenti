@@ -38,7 +38,7 @@ class MapReader : public QObject
 {
 Q_OBJECT
 public:
-    MapReader(QFile& xmlFile);
+    MapReader(QFile& xmlFile, SettingsWidget* settingswidget);
     virtual ~MapReader();
     bool getMap();
     bool parse();

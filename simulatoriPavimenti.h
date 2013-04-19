@@ -16,6 +16,7 @@
 #include "map/map.h"
 #include "engine/trafficengine.h"
 #include "../service/simulatorePavimentiTypes.h"
+#include "../service/settingswidget.h"
 
 class SimulatoriPavimenti : public QMainWindow
 {
@@ -41,6 +42,7 @@ private:
 
     QMenu* settingsMenu;
     QAction* preferencesAct;
+    SettingsWidget* settingswidget;
     
     QMenu* aboutMenu;
     QAction* aboutAct;
