@@ -25,23 +25,34 @@
 #include <QTabWidget>
 #include <QPainter>
 #include <QCheckBox>
+class SettingsWidget;
+class TrafficEngine;
+#include "../engine/trafficengine.h"
 
 
 class SettingsWidget : public QTabWidget
 {
+    Q_OBJECT
 private:
     QWidget *graphicTap;
     void setupUI();
     void setupUIGraphicTab();
     
-    QCheckBox *antialiasing;
-    QCheckBox *textantialiasing;
-    QCheckBox *highQualityAntialiasing;
-    QCheckBox *smoothPixmapTransform;
-    QCheckBox *nonCosmeticDefaultPen;
+    QCheckBox* antialiasing;
+    QCheckBox* textantialiasing;
+    QCheckBox* highQualityAntialiasing;
+    QCheckBox* smoothPixmapTransform;
+    QCheckBox* nonCosmeticDefaultPen;
+    QCheckBox* engineDebug;
+    
+    TrafficEngine *trafficEngine;
     
 public:
     explicit SettingsWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    /**
+     * set to 0 to unbound the settings widget to the any trafficEngine
+     **/ 
+    void setTrafficEngine(TrafficEngine *trafficEngine);
     
     QPainter::RenderHints getRenderingHint();
 };

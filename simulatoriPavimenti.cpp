@@ -74,7 +74,7 @@ void SimulatoriPavimenti::getMap(Map* map)
     this->setMapWidget(map);
 
     delete this->engine;
-    engine = new TrafficEngine(map, 60);
+    engine = new TrafficEngine(this->settingswidget,map, 60);
     //TODO spostare l'hardcode nelle impostazioni
 
     this->centralWidget()->setVisible(true);

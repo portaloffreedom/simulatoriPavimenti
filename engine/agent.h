@@ -83,6 +83,7 @@ public:
     /** How far the next near objetive has to be set */
     virtual smReal getMotionStep();
     virtual bool collide(Agent* agent);
+    virtual smReal pathDistance(Agent* agent);
     
     QPointF getPosition();
     smReal getOrientation();

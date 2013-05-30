@@ -31,23 +31,31 @@
 #include "../service/timer.h"
 #include "../service/simulatorePavimentiTypes.h"
 
-#define ENGINE_DEBUG
+
+// #ifdef ENGINE_DEBUG
+// #define E_DBG(A) (A)
+// #elseif
+// #define E_DEBUG(A)
+// #endif
 
 class AgentBehavior;
 class Agent;
 
+class Map;
 
 class TrafficEngine : public QObject
 {
 Q_OBJECT
 
 private:
+    SettingsWidget *settingsWidget;
     Map *map;
     QTimer *qtimer;
     Timer *timer;
     smReal fps;
     smReal speed;
     uint population;
+    bool ENGINE_DEBUG;
 
     QList<AgentBehavior*> behaviorList;
     QList<Agent*> agentList;
@@ -67,11 +75,12 @@ private:
     void repaintGraphics(smReal time);
 
 public:
-    TrafficEngine(Map *map, smReal fps=std::numeric_limits<double>::infinity());
+    TrafficEngine(SettingsWidget* settingWidget, Map* map, smReal fps = std::numeric_limits<double>::infinity());
     virtual ~TrafficEngine();
 
     smReal getFps();
     smReal getFrameDuration();
+    bool isEngineDebugActive();
 
 signals:
     void newBehaviour(QWidget* widgetBehaviour);
@@ -84,6 +93,7 @@ public slots:
     void createAgent(int behaviorI = 0);
     void createAgent(AgentBehavior* behavior);
     int addBehavior(AgentBehavior* behavior);
+    void setEngineDebug(bool value);
 
 private slots:
     void drawAgents(QPainter &painter);

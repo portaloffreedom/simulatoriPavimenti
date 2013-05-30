@@ -33,7 +33,7 @@ class Map : public QWidget
 {
 Q_OBJECT
 public:
-    Map(SettingsWidget* settingswidget);
+    Map(SettingsWidget *settingswidget);
     virtual ~Map();
 
     QPointF getEntrancePoint();

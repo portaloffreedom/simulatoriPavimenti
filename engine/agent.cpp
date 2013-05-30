@@ -23,6 +23,7 @@
 #include <iostream>
 #include <string>
 #include "../service/randomservice.h"
+#include "../service/mathservice.h"
 
 Agent::Agent(QString name, QString description, QString id, QPointF initialPos,
 	     TrafficEngine *trafficEngine, AgentBehavior* behavior, QObject* parent) :
@@ -115,7 +116,6 @@ smReal Agent::getOrientation()
 
 void Agent::move(QPointF objetive, smReal time)
 {
-#define SQR(x) ((x)*(x))
     this->objective = objetive;
 
     QPointF position = this->getPosition();
@@ -125,19 +125,27 @@ void Agent::move(QPointF objetive, smReal time)
 
     //control if maxSpeed is reached
     if (newSpeed >= maxSpeed)
-	newSpeed = maxSpeed;
+        newSpeed = maxSpeed;
 
     // update new orientation
     QPointF newOrientationV = objetive-position;
-    newOrientationV /= sqrt(SQR(newOrientationV.x())+SQR(newOrientationV.y()));
+    newOrientationV /= sqrt(
+        smMath::Quad(newOrientationV.x())
+        +
+        smMath::Quad(newOrientationV.y())
+    );
 
     //control orientation accelleration
     QPointF orientationChangeV = newOrientationV-orientationV;
-    smReal orientationChange = (SQR(orientationChangeV.x())+SQR(orientationChangeV.y()))/time;
+    smReal orientationChange = (
+        smMath::Quad(orientationChangeV.x())
+        +
+        smMath::Quad(orientationChangeV.y())
+    )/time;
 
     //control orientation change over speed
     if (orientationChange * newSpeed > maxSpeed)
-	newSpeed = maxSpeed / orientationChange;
+        newSpeed = maxSpeed / orientationChange;
 
 
     //calculate new accelleration in relation of new speed
@@ -145,19 +153,19 @@ void Agent::move(QPointF objetive, smReal time)
     
     //control orientation accelleration
     if (acceleration < maxDecelleration) {
-	acceleration = maxDecelleration;
-	newSpeed = (acceleration*time)+speed;
-	
-	orientationChangeV /= orientationChange; //normalize vector
-	orientationChange = maxSpeed / newSpeed;
-	orientationChangeV *= orientationChange;
+        acceleration = maxDecelleration;
+        newSpeed = (acceleration*time)+speed;
+        
+        orientationChangeV /= orientationChange; //normalize vector
+        orientationChange = maxSpeed / newSpeed;
+        orientationChangeV *= orientationChange;
 
-	newOrientationV = orientationChangeV+orientationV;
+        newOrientationV = orientationChangeV+orientationV;
     }
 
 
     //calculate new position (using the "Equations of motion")
-    smReal linearMove = speed*time + .5*(acceleration*SQR(time));
+    smReal linearMove = speed*time + .5*(acceleration*smMath::Quad(time));
     QPointF move = linearMove*newOrientationV;
 
     //add noise to the movement
@@ -173,7 +181,6 @@ void Agent::move(QPointF objetive, smReal time)
     this->orientationV = newOrientationV;
     this->speed = newSpeed;
     this->position = position+move;
-#undef SQR
 
 #ifdef Agent_DEBUG
 //     getOrientation();
@@ -181,20 +188,21 @@ void Agent::move(QPointF objetive, smReal time)
     
 }
 
+smReal Agent::pathDistance(Agent* agent)
+{
+    return smMath::Distance(this->position,agent->position);
+}
+    
+
 bool Agent::collide(Agent* agent)
 {
-    #define SQR(x) ((x)*(x))
     //QLineF distance(this->position,agent->position);
-    float distance = sqrt(
-	SQR( this->position.x() - agent->position.x() ) +
-	SQR( this->position.y() - agent->position.y() )
-    );
+    smReal distance = this->pathDistance(agent);
     
     if (distance <= (this->dimensions+agent->dimensions))
-	return true;
+        return true;
     else
-	return false;
-    #undef SQR
+        return false;
 }
 
 void Agent::revertMovement()

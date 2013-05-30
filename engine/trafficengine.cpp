@@ -25,31 +25,49 @@
 #include <iostream>
 #include <cmath>
 
-TrafficEngine::TrafficEngine(Map* map, smReal fps) :
+#define E_DBG(A) {if (ENGINE_DEBUG) {A;}}
+
+TrafficEngine::TrafficEngine(SettingsWidget *settingsWidget,Map* map, smReal fps) :
     map(map),
     fps(fps),
     speed(1.0),
+    ENGINE_DEBUG(false),
+    settingsWidget(settingsWidget),
     population(5)
 {
     this->qtimer = new QTimer(this);
     this->timer = new Timer(this);
-//     this->addBehavior(new PathBehavior(this));
     this->lastFramesDuration.append(1);
 
     connect(qtimer,SIGNAL(timeout()),this,SLOT(step()));
     connect(map,SIGNAL(isDrawing(QPainter&)),this,SLOT(drawAgents(QPainter&)));
-#ifdef ENGINE_DEBUG
-    connect(map,SIGNAL(isDrawing(QPainter&)),this,SLOT(drawDebugInfo(QPainter&)));
-#endif
-
-//     this->createAgent();
+    //E_DBG(connect(map,SIGNAL(isDrawing(QPainter&)),this,SLOT(drawDebugInfo(QPainter&))));
+    
+    this->settingsWidget->setTrafficEngine(this);
 }
 
+void TrafficEngine::setEngineDebug(bool value)
+{
+    //std::cout<<"setting engine debug to "<<value<<std::endl;
+    
+    if (ENGINE_DEBUG != value) {
+        if (value)
+            connect(map,SIGNAL(isDrawing(QPainter&)),this,SLOT(drawDebugInfo(QPainter&)));
+        else
+            disconnect(map,SIGNAL(isDrawing(QPainter&)),this,SLOT(drawDebugInfo(QPainter&)));
+        ENGINE_DEBUG = value;
+    }
+}
 
+bool TrafficEngine::isEngineDebugActive()
+{
+    return this->ENGINE_DEBUG;
+}
 
 
 TrafficEngine::~TrafficEngine()
 {
+    settingsWidget->setTrafficEngine(0);
     delete this->map;
 //     this->~QObject();
 }
@@ -60,10 +78,10 @@ TrafficEngine::~TrafficEngine()
 void TrafficEngine::start()
 {
     if (qtimer->isActive())
-	qtimer->stop();
+        qtimer->stop();
     else {
-	timer->reset();
-	qtimer->start((1/fps)*1000);
+        timer->reset();
+        qtimer->start((1/fps)*1000);
     }
 }
 
@@ -74,14 +92,16 @@ void TrafficEngine::start()
 void TrafficEngine::controlPopulation(smReal time)
 {
     uint totalPopulation = agentList.size();
-//     smReal populationToAdd = population - totalPopulation;
-//     populationToAdd = randomService.randomNormal(population,std::abs(populationToAdd/2));
-    smReal population = randomService.randomNormal(this->population,1);
+    smReal population = 0;
+    if (this->population < 10)
+        population = this->population;
+    else 
+        population = randomService.randomNormal(this->population,1);
+    
+    //If the population is enough, don't add anyone
     smReal populationToAdd = (population - totalPopulation);
-
-    //If the population is enought, don't add anyone
     for (int i=1; i<populationToAdd; i++) {
-	this->createAgent();
+        this->createAgent();
     }
 }
 
@@ -108,17 +128,17 @@ void TrafficEngine::step()
     smReal passedTime = timer->getElapsedSecondsAndReset();
 
     this->controlPopulation(passedTime);
-	smReal controlPopulationTimer = timer->getElapsedSeconds();
+        smReal controlPopulationTimer = timer->getElapsedSeconds();
     this->updatePositions(passedTime);
-	smReal updatePositionsTimer = timer->getElapsedSeconds() - controlPopulationTimer;
+        smReal updatePositionsTimer = timer->getElapsedSeconds() - controlPopulationTimer;
     this->repaintGraphics(passedTime);
-	this->controlPopulationTimer = controlPopulationTimer;
-	this->updatePositionsTimer = updatePositionsTimer;
-	totalFrameRenderTime = timer->getElapsedSeconds();
-	repaintGraphicsTimer = totalFrameRenderTime - this->updatePositionsTimer;
+        this->controlPopulationTimer = controlPopulationTimer;
+        this->updatePositionsTimer = updatePositionsTimer;
+        totalFrameRenderTime = timer->getElapsedSeconds();
+        repaintGraphicsTimer = totalFrameRenderTime - this->updatePositionsTimer;
     
     if (lastFramesDuration.size() > 10)
-	this->lastFramesDuration.pop_front();
+        this->lastFramesDuration.pop_front();
     this->lastFramesDuration.append(passedTime);
 }
 
@@ -144,8 +164,8 @@ void TrafficEngine::createAgent(AgentBehavior* behavior)
     Agent* agent = new Agent("ciccio","","a1",position,this,behavior,this);
 
     if (agentCollideAgent(agent)) {
-	delete agent;
-	return;
+        delete agent;
+        return;
     }
     this->agentList.append(agent);
 }
@@ -160,20 +180,14 @@ int TrafficEngine::addBehavior(AgentBehavior* behavior)
 
 void TrafficEngine::moveAgents(smReal time)
 {
-    //TODO prova a muovere tutti
+    //prova a muovere tutti
     Agent *agent;
     foreach(agent,agentList) {
-	agent->callMotion(time);
+        agent->callMotion(time);
     }
    
-    //TODO risoluzione collisioni
+    //risoluzione collisioni
     controlCollisions();
-    
-//     Agent *agent;
-//     foreach(agent,agentList) {
-// 	agent->callMotion(time);
-//     }
-
 }
 
 void TrafficEngine::drawAgents(QPainter& painter)
@@ -184,7 +198,7 @@ void TrafficEngine::drawAgents(QPainter& painter)
     painter.setBrush(QBrush(Qt::magenta));
     Agent *agent;
     foreach(agent,agentList) {
-	agent->draw(painter);
+        agent->draw(painter);
     }
 
     painter.restore();
@@ -203,13 +217,9 @@ void TrafficEngine::drawDebugInfo(QPainter& painter)
     painter.translate(5,fontSize);
     painter.scale(.7,.7);
     
-//     painter.translate(0,fontSize*2);
     painter.drawText(0,fontSize*2,QString("Total: ").append(QString::number(this->totalFrameRenderTime)));
-//     painter.translate(0,fontSize*2);
     painter.drawText(0,fontSize*4,QString("controlPopulation: ").append(QString::number(this->controlPopulationTimer)));
-//     painter.translate(0,fontSize*2);
     painter.drawText(0,fontSize*6,QString("updatePositions: ").append(QString::number(this->updatePositionsTimer)));
-//     painter.translate(0,fontSize*2);
     painter.drawText(0,fontSize*8,QString("repaint: ").append(QString::number(this->repaintGraphicsTimer)));
 
     painter.restore();
@@ -220,25 +230,23 @@ void TrafficEngine::controlCollisions()
     int collisions = 1;
     
     while (collisions > 0){
-	collisions = 0;
-	
-	//TODO controllo collisioni con gli oggetti statici
-	
-	// controllo collisioni tra gli agenti
-	for(int i=0; i<agentList.size(); i++){
-	    Agent *agentA = agentList[i];
-	    
-	    for (int j=i+1; j<agentList.size(); j++){
-		Agent *agentB = agentList[j];
-		
-		if (agentA->collide(agentB)) {
-		    solveCollision(agentA,agentB);
-		    collisions++;
-		}
-	    }
-	}
-	std::cout<<"Collisions: "<<collisions<<std::endl;
-	//collisions = 0;
+        collisions = 0;
+        
+        //TODO controllo collisioni con gli oggetti statici
+        
+        // controllo collisioni tra gli agenti
+        for(int i=0; i<agentList.size(); i++){
+            Agent *agentA = agentList[i];
+            
+            for (int j=i+1; j<agentList.size(); j++){
+                Agent *agentB = agentList[j];
+                
+                if (agentA->collide(agentB)) {
+                    solveCollision(agentA,agentB);
+                    collisions++;
+                }
+            }
+        }
     }
 }
 
@@ -247,18 +255,18 @@ void TrafficEngine::controlCollisions()
 smReal TrafficEngine::getFps()
 {
     smReal value, sum=0;
-    foreach(value, lastFramesDuration) {
-	sum += 1/value;
-    }
+    foreach(value, lastFramesDuration)
+        sum += 1/value;
+    
     return sum/lastFramesDuration.size();
 }
 
 smReal TrafficEngine::getFrameDuration()
 {
     smReal value, sum=0;
-    foreach(value, lastFramesDuration) {
-	sum += value;
-    }
+    foreach(value, lastFramesDuration)
+        sum += value;
+        
     return sum/lastFramesDuration.size();
 }
 
@@ -273,20 +281,20 @@ bool TrafficEngine::agentCollideAgent(Agent* agent)
 {
     Agent *otherAgent;
     foreach(otherAgent,agentList) {
-	if (agent->collide(otherAgent))
-	    return true;
+        if (agent->collide(otherAgent))
+            return true;
     }
     return false;
 }
 
 void TrafficEngine::solveCollision(Agent* a, Agent* b)
 {
-    #ifdef Agent_DEBUG
+    //TODO riscrivere in maniera decente
+    E_DBG(
     a->setCrash();
     b->setCrash();
-    #endif
+    )
     a->revertMovement();
-    b->revertMovement();    
-    //TODO solve collision
+    b->revertMovement();
 }
 

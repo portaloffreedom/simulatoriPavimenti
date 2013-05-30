@@ -33,7 +33,7 @@ void PathBehavior::agentMove(Agent* agent, smReal time)
 	AgentObjective objectiveInfo = getObjective(pos);
 	agents[agent] = objectiveInfo;
 	objective = objectiveInfo.objective;
-	std::cout<<"distance("<<distance.length()<<") motionStep("<<agent->getMotionStep()<<")"<<std::endl;
+	//std::cout<<"distance("<<distance.length()<<") motionStep("<<agent->getMotionStep()<<")"<<std::endl;
     }
     agent->move(objective,time);
 

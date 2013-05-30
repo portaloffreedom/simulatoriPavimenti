@@ -19,7 +19,9 @@
 
 
 #include "settingswidget.h"
+#include "../engine/trafficengine.h"
 #include <QFormLayout>
+#include <iostream>
 
 SettingsWidget::SettingsWidget(QWidget* parent, Qt::WindowFlags f)
     : QTabWidget()
@@ -44,12 +46,24 @@ void SettingsWidget::setupUIGraphicTab()
     highQualityAntialiasing = new QCheckBox(tr("highQualityAntialiasing"),graphicTap);
     smoothPixmapTransform = new QCheckBox(tr("smoothPixmapTransform"),graphicTap);
     nonCosmeticDefaultPen = new QCheckBox(tr("NonCosmeticDefaultPen"),graphicTap);
+    engineDebug = new QCheckBox(tr("Engine Debug"),graphicTap);
+    engineDebug->setEnabled(false);
+    engineDebug->setChecked(false);
     
     graficLayout->addWidget(antialiasing);
     graficLayout->addWidget(textantialiasing);
     graficLayout->addWidget(highQualityAntialiasing);
     graficLayout->addWidget(smoothPixmapTransform);
     graficLayout->addWidget(nonCosmeticDefaultPen);
+    graficLayout->addWidget(engineDebug);
+    
+//     connect(engineDebug,SIGNAL(stateChanged(int)),this,SLOT(reactStateChanged(int)));
+//     connect(engineDebug,SIGNAL(clicked(bool)),this,SLOT(reactClicked(bool)));
+//     connect(engineDebug,SIGNAL(pressed()),this,SLOT(reactPressed()));
+//     connect(engineDebug,SIGNAL(released()),this,SLOT(reactReleased()));
+//     connect(engineDebug,SIGNAL(toggled(bool)),this,SLOT(reactToggled(bool)));
+//     connect(engineDebug,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(reactCustomContextMenuRequested(QPoint)));
+    
 }
 
 QPainter::RenderHints SettingsWidget::getRenderingHint()
@@ -68,5 +82,20 @@ QPainter::RenderHints SettingsWidget::getRenderingHint()
     return hints;
 }
 
-
+void SettingsWidget::setTrafficEngine(TrafficEngine* trafficEngine)
+{
+    //std::cout<<"setTrafficEngine to "<<trafficEngine<<std::endl;
+    
+    if (trafficEngine != 0) {
+        this->engineDebug->setChecked(trafficEngine->isEngineDebugActive());
+        this->engineDebug->setEnabled(true);
+        connect(engineDebug,SIGNAL(toggled(bool)),trafficEngine,SLOT(setEngineDebug(bool)));
+    }
+    else {
+        this->engineDebug->setEnabled(false);
+        disconnect(engineDebug,SIGNAL(toggled(bool)),this->trafficEngine,SLOT(setEngineDebug(bool)));
+    }
+    
+    this->trafficEngine = trafficEngine;
+}
 
