@@ -25,6 +25,7 @@
 #include <qxmlstream.h>
 #include "map.h"
 #include "../service/simulatorePavimentiTypes.h"
+#include "../engine/groundengine.h"
 
 // #define MAPREADER_DEBUG
 
@@ -75,9 +76,15 @@ signals:
     
 private:
     Map *map;
+    GroundEngine *groundEngine;
     QFile *xmlFile;
     QXmlStreamReader xml;
     bool parseStatus;
+    struct sensorsPrototype{
+        smReal cx,cy,angle;
+        QString type;
+    };
+    QVector<sensorsPrototype> sensorsPrototypes;
     
     QXmlStreamReader::TokenType nextToken();
     void error(QString);

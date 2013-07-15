@@ -84,7 +84,7 @@ QPainter::RenderHints SettingsWidget::getRenderingHint()
 
 void SettingsWidget::setTrafficEngine(TrafficEngine* trafficEngine)
 {
-    //std::cout<<"setTrafficEngine to "<<trafficEngine<<std::endl;
+    //ti stotiti sto std::cout<<"setTrafficEngine to "<<trafficEngine<<std::endl;
     
     if (trafficEngine != 0) {
         this->engineDebug->setChecked(trafficEngine->isEngineDebugActive());

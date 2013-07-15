@@ -27,6 +27,7 @@
 #include "spatialobject.h"
 #include "../service/simulatorePavimentiTypes.h"
 #include "../service/settingswidget.h"
+#include "../engine/groundsensor.h"
 
 
 class Map : public QWidget
@@ -38,6 +39,9 @@ public:
 
     QPointF getEntrancePoint();
     virtual QSize sizeHint() const;
+    QVector<GroundSensor*> &getSensorMap() {
+      return this->sensorMap;  
+    };
     
     static char version[];
 
@@ -45,6 +49,9 @@ signals:
     void isDrawing(QPainter &painter);
     
 public slots:
+    void addSensor(GroundSensor *sensor)
+        { sensorMap.append(sensor); };
+        
     void beginBorder(const QString description, const QString id);
     void addBorderPolygon();
     void addBorderPolygonPoint(QPointF point);
@@ -85,6 +92,9 @@ private:
     QVector<SpatialObject*> entrances;
     QVector<SpatialObject*> exits;
     QVector<SpatialObject*> obstacles;
+    
+    QVector<GroundSensor*> sensorMap;
+    void drawSensorMap(QPainter &p);
     
     void analyzeConstraints(const QPointF point);
     void analyzeCirlceConstraints(const QPointF center, const smReal radius);

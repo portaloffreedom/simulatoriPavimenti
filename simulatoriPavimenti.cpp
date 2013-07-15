@@ -59,16 +59,16 @@ void SimulatoriPavimenti::open()
     std::cout<<"file scelto: "<<fileName.toStdString()<<std::endl;
 
     MapReader mapreader(file, this->settingswidget);
-    connect(&mapreader,SIGNAL(finished(Map*)),this,SLOT(getMap(Map*)));
+    connect(&mapreader,SIGNAL(finished(Map*)),this,SLOT(parsingFinished(Map*)));
     connect(&mapreader,SIGNAL(error(QString,QString)),this,SLOT(printError(QString,QString)));
     mapreader.parse();
-    disconnect(&mapreader,SIGNAL(finished(Map*)),this,SLOT(getMap(Map*)));
+    disconnect(&mapreader,SIGNAL(finished(Map*)),this,SLOT(parsingFinished(Map*)));
     disconnect(&mapreader,SIGNAL(error(QString,QString)),this,SLOT(printError(QString,QString)));
 
 
 }
 
-void SimulatoriPavimenti::getMap(Map* map)
+void SimulatoriPavimenti::parsingFinished(Map* map)
 {
     this->resetButtons();
     this->setMapWidget(map);

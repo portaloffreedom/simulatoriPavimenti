@@ -22,11 +22,16 @@
 #define MATHSERVICE_H
 #include <QPointF>
 #include <QLineF>
+#include <cmath>
 #include "simulatorePavimentiTypes.h"
 //#include "../service/simulatorePavimentiTypes.h"
 
+#define _USE_MATH_DEFINES
+
 namespace smMath
 {
+    const smReal PI = M_PI;
+    
     smReal Quad(smReal x);
     smReal Distance (QPointF p1, QPointF p2);
     smReal Distance (QLineF line, QPointF point);
@@ -35,6 +40,7 @@ namespace smMath
     bool Intersect(QLineF l1, QLineF l2, smReal radius);
     smReal getRectM(QLineF line);
     smReal getRectQ(QLineF line,smReal m);
+    smReal normalCurve(smReal x, smReal mu=0.0, smReal sigma=1.0);
 };
 
 #endif // MATHSERVICE_H

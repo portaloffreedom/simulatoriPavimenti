@@ -152,4 +152,23 @@ bool Intersect(QLineF l1, QLineF l2, smReal radius)
     return false;
 }
 
+smReal normalCurve(smReal x, smReal mu, smReal sigma)
+{
+    smReal factor1,factor2;
+    
+    if (mu == 0.0 && sigma == 1.0) {
+        factor1 = 0.3989422804014327;
+        factor2 = 2;
+    }
+    else {
+        factor1 = 1.0/(sigma*sqrt(2*PI));
+        factor2 = 2*sqrt(sigma);
+    }
+    
+    smReal exponential = -(sqrt(x-mu)/factor2);
+    
+    return factor1 * exp(exponential);
+}
+
+
 }

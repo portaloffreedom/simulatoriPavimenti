@@ -45,21 +45,21 @@ QSize Map::sizeHint() const
     return QSize(400,400);
 }
 
-
-void deleteInsideVector(QVector<SpatialObject*> vector)
-{
-    while (!vector.isEmpty()) {
-	delete vector.last();
-	vector.pop_back();
+template <class elimination>
+void deleteInsideVector(QVector<elimination*> vector)
+{   
+    foreach(elimination *obj, vector) {
+        delete obj;
     }
 }
 
 Map::~Map()
 {
-    deleteInsideVector(borders);
-    deleteInsideVector(entrances);
-    deleteInsideVector(exits);
-    deleteInsideVector(obstacles);
+    deleteInsideVector<SpatialObject>(borders);
+    deleteInsideVector<SpatialObject>(entrances);
+    deleteInsideVector<SpatialObject>(exits);
+    deleteInsideVector<SpatialObject>(obstacles);
+    deleteInsideVector<GroundSensor>(sensorMap);
  }
 
  
@@ -116,6 +116,8 @@ void Map::paintEvent(QPaintEvent* event)
     painter.setPen(QPen(Qt::white));
     drawInsidePolygon(painter,obstacles);
     
+    drawSensorMap(painter);
+    
     emit isDrawing(painter);
     
     //fine disegno -------------------------------------------------------------
@@ -123,6 +125,14 @@ void Map::paintEvent(QPaintEvent* event)
     painter.end();
     
 }
+void Map::drawSensorMap ( QPainter& p )
+{
+    foreach (GroundSensor* sensor, sensorMap) {
+        sensor->draw(p);
+    }
+}
+
+
 void Map::analyzeCirlceConstraints(const QPointF center, const smReal radius)
 {
     QPointF upperRight = center + QPointF(radius,radius);

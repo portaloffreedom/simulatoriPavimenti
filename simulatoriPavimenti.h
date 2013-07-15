@@ -15,6 +15,7 @@
 #include <QSlider>
 #include "map/map.h"
 #include "engine/trafficengine.h"
+#include "engine/groundengine.h"
 #include "../service/simulatorePavimentiTypes.h"
 #include "../service/settingswidget.h"
 
@@ -50,6 +51,7 @@ private:
 
     Map *map;
     TrafficEngine *engine;
+    GroundEngine *groundEngine;
 
     
     QVBoxLayout* mainVerticalLayout;
@@ -79,7 +81,7 @@ private slots:
     
 public slots:
     void open();
-    void getMap(Map* );
+    void parsingFinished(Map*);
     void printError(QString,QString);
     void newBehaviourAdded(QWidget* behaviourWidget);
 };

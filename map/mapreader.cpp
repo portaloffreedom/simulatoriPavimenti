@@ -18,6 +18,7 @@
 
 
 #include "mapreader.h"
+#include "../engine/groundsensor.h"
 #include <QXmlStreamReader>
 #include <iostream>
 #include <QString>
@@ -26,6 +27,7 @@ MapReader::MapReader(QFile &xmlFile, SettingsWidget * settingswidget)
 {
     this->xmlFile = &xmlFile;
     map = new Map(settingswidget);
+    //groundEngine = new GroundEngine(map);
 
     connect(this,SIGNAL(beginBorder(QString,QString))  ,map,SLOT(beginBorder(QString,QString))  );
     connect(this,SIGNAL(addBorderPolygon())            ,map,SLOT(addBorderPolygon())            );
@@ -95,7 +97,7 @@ QXmlStreamReader::TokenType MapReader::nextToken()
             else
                 MAPREADER_DEBUG_COUT(xml.text().toString().toStdString())
 #endif
-	    break; //parse the next token
+            break; //parse the next token
 
         case QXmlStreamReader::NoToken :
             emit error("No Token","unexpected error: next token is a \"NoToken\"");
@@ -106,11 +108,11 @@ QXmlStreamReader::TokenType MapReader::nextToken()
 
         default:
 #ifdef MAPREADER_DEBUG
-	    QString tokenString = xml.tokenString();
-	    tokenString.append(" -> ").append(xml.name());
-	    MAPREADER_DEBUG_COUT(tokenString.toStdString())
+            QString tokenString = xml.tokenString();
+            tokenString.append(" -> ").append(xml.name());
+            MAPREADER_DEBUG_COUT(tokenString.toStdString())
 #endif
-	    return token;
+            return token;
         }
     }
 
@@ -162,42 +164,42 @@ bool MapReader::parse()
     QStringRef version = attributes.value("version");
     if (!attributes.hasAttribute("version") || version.compare(Map::version) != 0) {
         QString errorString = QString("The document has an unsupported version");
-	QString errorDetailString = QString("the version supported is \"");
-	errorDetailString.append(Map::version);
-	errorDetailString.append("\" instead I've found: \"").append(version).append('"');
-	emit error(errorString,errorDetailString);
-	return false;
+        QString errorDetailString = QString("the version supported is \"");
+        errorDetailString.append(Map::version);
+        errorDetailString.append("\" instead I've found: \"").append(version).append('"');
+        emit error(errorString,errorDetailString);
+        return false;
     }
     
     // floorImage and sensorTypes
     this->nextToken();
     while(xml.isStartElement()) {
-	if (xml.name().compare("floorImage") == 0) { //TODO at least one
-	    if (this->parseFloorImage()) {
-		this->nextToken();
-		continue;
-	    }
-	    else
-		return false;
-	}
-	if (xml.name().compare("sensorTypes") == 0) { //TODO maximum one
-	    if (this->parseSensorTypes()) {
-		this->nextToken();
-		continue;
-	    }
-	    else
-		return false;
-	}
-	// Something got wrong: only floorImage or sensorTypes are expected
-	QString errorString = QString("Something got wrong");
-	QString errorDetailString = QString("Only floorImage or sensorTypes are expected.\nInstead I've found: ");
-	errorDetailString.append(xml.name());
-	emit error(errorString,errorDetailString);
-	return false;
+        if (xml.name().compare("floorImage") == 0) { //TODO at least one
+            if (this->parseFloorImage()) {
+                this->nextToken();
+                continue;
+            }
+            else
+                return false;
+        }
+        if (xml.name().compare("sensorTypes") == 0) { //TODO maximum one
+            if (this->parseSensorTypes()) {
+                this->nextToken();
+                continue;
+            }
+            else
+                return false;
+        }
+        // Something got wrong: only floorImage or sensorTypes are expected
+        QString errorString = QString("Something got wrong");
+        QString errorDetailString = QString("Only floorImage or sensorTypes are expected.\nInstead I've found: ");
+        errorDetailString.append(xml.name());
+        emit error(errorString,errorDetailString);
+        return false;
     }
     
     if (!controlNotEndElement("map"))
-	return false;
+        return false;
 
     MAPREADER_DEBUG_COUT("everything got it right")
     emit finished(this->map);
@@ -209,40 +211,40 @@ bool MapReader::parseFloorImage()
 {
     bool sensorParsed=false, roomParsed=false;
     for (int i = 0; i<2; i++) {
-	this->nextToken();
-	if (!xml.isStartElement()) {
-	    QString errorString = QString("Something got wrong");
-	    QString errorDetailString = QString("Probably the document isn't well formatted.\nI should have find startElement."
-						"Instead I've found: ");
-	    errorDetailString.append(xml.tokenString());
-	    emit error(errorString,errorDetailString);
-	    return false;
-	}
-	if ( (!roomParsed) && (xml.name().compare("room") == 0) ) {
-	    if (!this->parseRoom())
-		return false;
-	    roomParsed = true;
-	    continue;
-	}
-	if ( (!sensorParsed) && (xml.name().compare("sensors") == 0) ) {
-	    if (!this->parseSensors())
-		return false;
-	    sensorParsed = true;
-	    continue;
-	}
-	
-	QString errorString = QString("Something got wrong");
-	QString errorDetailString = QString("Probably the document isn't well formatted.\nI should have find \"room\" or \"sensors\" elements."
-					    "Instead I've found: ");
-	errorDetailString.append(xml.name());
-	errorDetailString.append("Or maybe there is more than one \"room\" or \"sensors\" element (only one allowed for each one)");
-	emit error(errorString,errorDetailString);
-	return false;
+        this->nextToken();
+        if (!xml.isStartElement()) {
+            QString errorString = QString("Something got wrong");
+            QString errorDetailString = QString("Probably the document isn't well formatted.\nI should have find startElement."
+                                                "Instead I've found: ");
+            errorDetailString.append(xml.tokenString());
+            emit error(errorString,errorDetailString);
+            return false;
+        }
+        if ( (!roomParsed) && (xml.name().compare("room") == 0) ) {
+            if (!this->parseRoom())
+                return false;
+            roomParsed = true;
+            continue;
+        }
+        if ( (!sensorParsed) && (xml.name().compare("sensors") == 0) ) {
+            if (!this->parseSensors())
+                return false;
+            sensorParsed = true;
+            continue;
+        }
+        
+        QString errorString = QString("Something got wrong");
+        QString errorDetailString = QString("Probably the document isn't well formatted.\nI should have find \"room\" or \"sensors\" elements."
+                                            "Instead I've found: ");
+        errorDetailString.append(xml.name());
+        errorDetailString.append("Or maybe there is more than one \"room\" or \"sensors\" element (only one allowed for each one)");
+        emit error(errorString,errorDetailString);
+        return false;
     }
 
     this->nextToken();
     if (!controlNotEndElement("floorImage"))
-	return false;
+        return false;
 
     return true;
 }
@@ -264,63 +266,63 @@ bool MapReader::parseRoom()
     
     this->nextToken();
     while(xml.isStartElement()) {
-	if ( xml.name().compare("border") == 0) {
-	    if (!this->parseFigure(&MapReader::beginBorder,
-				   &MapReader::addBorderPolygon,
-				   &MapReader::addBorderPolygonPoint,
-				   &MapReader::addBorderCircle,
-				   &MapReader::closeBorder ))
-		return false;
-	    borderParsed = true;
-	    this->nextToken();
-	    continue;
-	}
-	if ( xml.name().compare("entrance") == 0) {
-	    if (!this->parseFigure(&MapReader::beginEntrance,
-				   &MapReader::addEntrancePolygon,
-				   &MapReader::addEntrancePolygonPoint,
-				   &MapReader::addEntranceCircle,
-				   &MapReader::closeEntrance ))
-		return false;
-	    entranceParsed = true;
-	    this->nextToken();
-	    continue;
-	}
-	if ( xml.name().compare("exit") == 0) {
-	    if (!this->parseFigure(&MapReader::beginExit,
-				   &MapReader::addExitPolygon,
-				   &MapReader::addExitPolygonPoint,
-				   &MapReader::addExitCircle,
-				   &MapReader::closeExit ))
-		return false;
-	    exitParsed = true;
-	    this->nextToken();
-	    continue;
-	}
-	if ( xml.name().compare("obstacle") == 0) {
-	    if (!this->parseFigure(&MapReader::beginObstacle,
-				   &MapReader::addObstaclePolygon,
-				   &MapReader::addObstaclePolygonPoint,
-				   &MapReader::addObstacleCircle,
-				   &MapReader::closeObstacle ))
-		return false;
-	    this->nextToken();
-	    continue;
-	}
+        if ( xml.name().compare("border") == 0) {
+            if (!this->parseFigure(&MapReader::beginBorder,
+                                   &MapReader::addBorderPolygon,
+                                   &MapReader::addBorderPolygonPoint,
+                                   &MapReader::addBorderCircle,
+                                   &MapReader::closeBorder ))
+                return false;
+            borderParsed = true;
+            this->nextToken();
+            continue;
+        }
+        if ( xml.name().compare("entrance") == 0) {
+            if (!this->parseFigure(&MapReader::beginEntrance,
+                                   &MapReader::addEntrancePolygon,
+                                   &MapReader::addEntrancePolygonPoint,
+                                   &MapReader::addEntranceCircle,
+                                   &MapReader::closeEntrance ))
+                return false;
+            entranceParsed = true;
+            this->nextToken();
+            continue;
+        }
+        if ( xml.name().compare("exit") == 0) {
+            if (!this->parseFigure(&MapReader::beginExit,
+                                   &MapReader::addExitPolygon,
+                                   &MapReader::addExitPolygonPoint,
+                                   &MapReader::addExitCircle,
+                                   &MapReader::closeExit ))
+                return false;
+            exitParsed = true;
+            this->nextToken();
+            continue;
+        }
+        if ( xml.name().compare("obstacle") == 0) {
+            if (!this->parseFigure(&MapReader::beginObstacle,
+                                   &MapReader::addObstaclePolygon,
+                                   &MapReader::addObstaclePolygonPoint,
+                                   &MapReader::addObstacleCircle,
+                                   &MapReader::closeObstacle ))
+                return false;
+            this->nextToken();
+            continue;
+        }
 
-	//TODO emit error
-	emit error("ciccia","pappa");
-	return false;
+        //TODO emit error
+        emit error("ciccia","pappa");
+        return false;
     }
     
     if (!controlNotEndElement("room"))
-	return false;
+        return false;
 
     if ( !borderParsed || !entranceParsed || !exitParsed ) {
-	QString errorString = QString("Not all elements necessary found.");
-	QString errorDetailString = QString("There must be at least one Border, one Entrace and one Exit");
-	emit error(errorString,errorDetailString);
-	return false;
+        QString errorString = QString("Not all elements necessary found.");
+        QString errorDetailString = QString("There must be at least one Border, one Entrace and one Exit");
+        emit error(errorString,errorDetailString);
+        return false;
     }
 
     return true;
@@ -328,10 +330,10 @@ bool MapReader::parseRoom()
 }
 
 bool MapReader::parseFigure(void (MapReader::*begin)(const QString description, const QString id),
-			    void (MapReader::*addPolygon)(),
-			    void (MapReader::*addPolygonPoint)(QPointF),
-			    void (MapReader::*addCircle)(QPointF center, smReal radius),
-			    void (MapReader::*close)())
+                            void (MapReader::*addPolygon)(),
+                            void (MapReader::*addPolygonPoint)(QPointF),
+                            void (MapReader::*addCircle)(QPointF center, smReal radius),
+                            void (MapReader::*close)())
 {
     QXmlStreamAttributes attributes = xml.attributes();
     const QString description = attributes.value("description").toString();
@@ -343,54 +345,106 @@ bool MapReader::parseFigure(void (MapReader::*begin)(const QString description, 
     int i;
     this->nextToken();
     for (i=0; xml.isStartElement(); i++) {
-	if ( xml.name().compare("polygon") == 0) {
-	    if (!this->parsePolygon(addPolygon,addPolygonPoint))
-		return false;
-	    this->nextToken();
-	    continue;
-	}
-	if ( xml.name().compare("circle") == 0) {
-	    if (!this->parseCircle(addCircle))
-		return false;
-	    this->nextToken();
-	    continue;
-	}
-	// Only polygons or circles allowed
-	//TODO emit error
-	emit error("ciccia","pappa");
-	return false;
+        if ( xml.name().compare("polygon") == 0) {
+            if (!this->parsePolygon(addPolygon,addPolygonPoint))
+                return false;
+            this->nextToken();
+            continue;
+        }
+        if ( xml.name().compare("circle") == 0) {
+            if (!this->parseCircle(addCircle))
+                return false;
+            this->nextToken();
+            continue;
+        }
+        // Only polygons or circles allowed
+        //TODO emit error
+        emit error("ciccia","pappa");
+        return false;
     }
 
     if (!controlNotEndElement(figureName.toString()))
-	return false;
+        return false;
 
     if (i==0) {
-	// There should be at least one polygon or circle
-	emit error("Error parsing figure","There should be at least one polygon or circle. None found");
-	return false;
+        // There should be at least one polygon or circle
+        emit error("Error parsing figure","There should be at least one polygon or circle. None found");
+        return false;
     }
     
     emit (this->*close)();
     return true;
 }
 
-
-//TODO actually doing nothing...
 bool MapReader::parseSensors()
 {
     while ( (!xml.isEndElement()) || (xml.name().compare("sensors"))!=0 ) {
-	this->nextToken();
+        if (xml.name().compare("sensor") == 0) {
+            sensorsPrototype sP;
+            QXmlStreamAttributes attributes = xml.attributes();
+            sP.cx = attributes.value("cx").toString().toFloat();
+            sP.cy = attributes.value("cy").toString().toFloat();
+            sP.angle = attributes.value("angle").toString().toFloat();
+            sP.type = attributes.value("typeid").toString();
+            
+            this->sensorsPrototypes.append(sP);
+            this->nextToken();
+            controlNotEndElement("sensor");
+        }
+        this->nextToken();
     }
     return true;
 }
 
 
-//TODO actually doing nothing...
+    
+// <type typeid="standard" placement="grid" rows="8" cols="8" margin="100,100,100,100" padding="200,200"/>
 bool MapReader::parseSensorTypes()
 {
+    QMap<QString,GroundSensor*> sensorTypeMap;
+    
     while ( (!xml.isEndElement()) || (xml.name().compare("sensorTypes"))!=0 ) {
-	this->nextToken();
+        if (xml.name().compare("type") == 0) {
+            QXmlStreamAttributes attributes = xml.attributes();
+            QString placement = attributes.value("placement").toString();
+            int rows = attributes.value("rows").toString().toInt();
+            int cols = attributes.value("cols").toString().toInt();
+            
+            QStringList margin = attributes.value("margin").toString().split(',');
+            smReal marginUp    = margin[0].toFloat();
+            smReal marginDown  = margin[1].toFloat();
+            smReal marginLeft  = margin[2].toFloat();
+            smReal marginRight = margin[3].toFloat();
+            
+            QStringList padding = attributes.value("padding").toString().split(',');
+            smReal paddingX = padding[0].toFloat();
+            smReal paddingY = padding[1].toFloat();
+            
+            
+            QString id = attributes.value("typeid").toString();
+            //TODO implement other sensors
+            if (id.compare("standard") != 0)
+                emit error ("Errore nel parsing dell'xml","Per adesso solo il sensore standard è implementato");
+            
+            GroundSensor *sensor = new GroundSensor(0,0,0,rows,cols,marginUp,marginDown,marginLeft,marginRight,paddingX,paddingY);
+            sensorTypeMap[id] = sensor;
+            
+            this->nextToken();
+            controlNotEndElement("type");
+        }
+        this->nextToken();
     }
+    
+    foreach( sensorsPrototype sProto, this->sensorsPrototypes )  {
+        GroundSensor *sensorType = sensorTypeMap[sProto.type];
+        GroundSensor *newSensor = sensorType->clone(sProto.cx,sProto.cy,sProto.angle);
+        std::cout<<newSensor->toString().toStdString()<<std::endl;
+        this->map->addSensor(newSensor);
+    }
+    foreach( GroundSensor *s, sensorTypeMap)
+        delete s;
+    
+    //TODO create real sensors
     return true;
 }
 
@@ -499,12 +553,12 @@ bool MapReader::parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*
     while (true) {
         this->nextToken();
 
-	if(!xml.isStartElement()) {
-	    if (!controlNotEndElement("polygon"))
-		return false;
-	    else
-		break;
-	}
+        if(!xml.isStartElement()) {
+            if (!controlNotEndElement("polygon"))
+                return false;
+            else
+                break;
+        }
 
         if(xml.name().compare("point") != 0) {
             emit error(errorString,"non è un punto");
@@ -517,16 +571,16 @@ bool MapReader::parsePolygon(void (MapReader::*addPolygon)(), void (MapReader::*
         QPointF point(x,y);
         emit (this->*addPolygonPoint)(point);
 #ifdef MAPREADER_DEBUG
-	QString trace_string("Aggiunto un punto a polygon: ");
-	trace_string.append(QString::number(point.x())).append(',').append(QString::number(point.y()));
-	MAPREADER_DEBUG_COUT(trace_string.toStdString())
-	
+        QString trace_string("Aggiunto un punto a polygon: ");
+        trace_string.append(QString::number(point.x())).append(',').append(QString::number(point.y()));
+        MAPREADER_DEBUG_COUT(trace_string.toStdString())
+        
 #endif
 
-	this->nextToken();
-	if (!controlNotEndElement("point"))
-	    return false;
-	
+        this->nextToken();
+        if (!controlNotEndElement("point"))
+            return false;
+        
         counter++;
     }
     
@@ -550,7 +604,7 @@ bool MapReader::parseCircle(void (MapReader::*addCircle)(QPointF center, smReal 
 
     this->nextToken();
     if (!controlNotEndElement("circle"))
-	return false;
+        return false;
 
     return true;
 }
@@ -572,14 +626,14 @@ void MapReader::error(QString errorString)
 bool MapReader::controlNotEndElement(QString element)
 {
     if ( (!xml.isEndElement()) || (xml.name().compare(element) != 0) ) {
-	//something got really wrong! probably the document isn't well formatted
-	QString errorString = QString("Something got really wrong");
-	QString errorDetailString = QString("Probably the document isn't well formatted."
-					    "\nI should have found \"");
-	errorDetailString.append(element).append("\" endElement. Instead I've found: \"");
-	errorDetailString.append(xml.name()).append("\" ").append(xml.tokenString());
-	emit error(errorString,errorDetailString);
-	return false;
+        //something got really wrong! probably the document isn't well formatted
+        QString errorString = QString("Something got really wrong");
+        QString errorDetailString = QString("Probably the document isn't well formatted."
+                                            "\nI should have found \"");
+        errorDetailString.append(element).append("\" endElement. Instead I've found: \"");
+        errorDetailString.append(xml.name()).append("\" ").append(xml.tokenString());
+        emit error(errorString,errorDetailString);
+        return false;
     }
     return true;
 }
