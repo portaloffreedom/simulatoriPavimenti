@@ -72,9 +72,10 @@ void SimulatoriPavimenti::parsingFinished(Map* map)
 {
     this->resetButtons();
     this->setMapWidget(map);
+    GroundEngine *groundEngine = new GroundEngine(map);
 
     delete this->engine;
-    engine = new TrafficEngine(this->settingswidget,map, 60);
+    engine = new TrafficEngine(this->settingswidget,map,groundEngine, 60);
     //TODO spostare l'hardcode nelle impostazioni
 
     this->centralWidget()->setVisible(true);
@@ -99,7 +100,7 @@ void SimulatoriPavimenti::printError(QString name, QString description)
 
 void SimulatoriPavimenti::addNewBehaviour()
 {
-    std::cout<<"cacca"<<std::endl;
+    //std::cout<<"added new behaviour"<<std::endl;
     //TODO crea il nuovo widget
     engine->addBehavior(new PathBehavior());
 }

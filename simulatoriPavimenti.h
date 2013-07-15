@@ -51,7 +51,6 @@ private:
 
     Map *map;
     TrafficEngine *engine;
-    GroundEngine *groundEngine;
 
     
     QVBoxLayout* mainVerticalLayout;

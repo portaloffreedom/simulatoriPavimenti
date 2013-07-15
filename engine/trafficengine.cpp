@@ -21,14 +21,15 @@
 #include "trafficengine.h"
 #include "behaviors/defaultbehavior.h"
 #include "behaviors/pathbehavior.h"
+#include "groundengine.h"
 #include "../service/randomservice.h"
 #include <iostream>
 #include <cmath>
 
 #define E_DBG(A) {if (ENGINE_DEBUG) {A;}}
 
-TrafficEngine::TrafficEngine(SettingsWidget *settingsWidget,Map* map, smReal fps) :
-    map(map),
+TrafficEngine::TrafficEngine(SettingsWidget* settingsWidget, Map* map, GroundEngine* groundEngine, smReal fps) :
+    map(map), groundEngine(groundEngine),
     fps(fps),
     speed(1.0),
     ENGINE_DEBUG(false),
@@ -131,6 +132,9 @@ void TrafficEngine::step()
         smReal controlPopulationTimer = timer->getElapsedSeconds();
     this->updatePositions(passedTime);
         smReal updatePositionsTimer = timer->getElapsedSeconds() - controlPopulationTimer;
+    this->updateSensors();
+        smReal updateSensorsTimer = timer->getElapsedSeconds() - updatePositionsTimer;
+        
     this->repaintGraphics(passedTime);
         this->controlPopulationTimer = controlPopulationTimer;
         this->updatePositionsTimer = updatePositionsTimer;
@@ -298,3 +302,10 @@ void TrafficEngine::solveCollision(Agent* a, Agent* b)
     b->revertMovement();
 }
 
+void TrafficEngine::updateSensors()
+{
+    groundEngine->reset();
+    foreach(Agent *agent, agentList) {
+        groundEngine->updateGround(agent);
+    }
+}

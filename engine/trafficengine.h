@@ -27,7 +27,9 @@
 
 #include "../map/map.h"
 #include "agentbehavior.h"
+#include "groundengine.h"
 #include "agent.h"
+#include "groundengine.h"
 #include "../service/timer.h"
 #include "../service/simulatorePavimentiTypes.h"
 
@@ -38,6 +40,7 @@
 // #define E_DEBUG(A)
 // #endif
 
+class GroundEngine;
 class AgentBehavior;
 class Agent;
 
@@ -59,6 +62,7 @@ private:
 
     QList<AgentBehavior*> behaviorList;
     QList<Agent*> agentList;
+    GroundEngine *groundEngine;
 
     void moveAgents(smReal time);
 
@@ -73,9 +77,10 @@ private:
     void solveCollision(Agent *a, Agent *b);
     void updatePositions(smReal time);
     void repaintGraphics(smReal time);
+    void updateSensors();
 
 public:
-    TrafficEngine(SettingsWidget* settingWidget, Map* map, smReal fps = std::numeric_limits<double>::infinity());
+    TrafficEngine(SettingsWidget* settingsWidget, Map* map, GroundEngine* groundEngine, smReal fps = std::numeric_limits<double>::infinity());
     virtual ~TrafficEngine();
 
     smReal getFps();
