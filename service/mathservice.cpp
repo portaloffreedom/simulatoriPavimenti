@@ -22,11 +22,6 @@
 
 
 namespace smMath {
-//#define SQR(x) ((x)*(x))
-
-smReal Quad(smReal x) {
-    return x*x;
-}
 
 smReal Distance(QPointF p1, QPointF p2)
 {
@@ -162,10 +157,10 @@ smReal normalCurve(smReal x, smReal mu, smReal sigma)
     }
     else {
         factor1 = 1.0/(sigma*sqrt(2*PI));
-        factor2 = 2*sqrt(sigma);
+        factor2 = 2*Quad(sigma);
     }
     
-    smReal exponential = -(sqrt(x-mu)/factor2);
+    smReal exponential = -(Quad(x-mu)/factor2);
     
     return factor1 * exp(exponential);
 }

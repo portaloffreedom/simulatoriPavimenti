@@ -32,7 +32,8 @@ namespace smMath
 {
     const smReal PI = M_PI;
     
-    smReal Quad(smReal x);
+    inline smReal Quad(smReal x) { return x*x; }
+    
     smReal Distance (QPointF p1, QPointF p2);
     smReal Distance (QLineF line, QPointF point);
     smReal Distance (QLineF l1, QPointF l2);
