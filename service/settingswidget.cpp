@@ -86,7 +86,7 @@ void SettingsWidget::setTrafficEngine(TrafficEngine* trafficEngine)
 {
     //ti stotiti sto std::cout<<"setTrafficEngine to "<<trafficEngine<<std::endl;
     
-    if (trafficEngine != 0) {
+    if (trafficEngine != nullptr) {
         this->engineDebug->setChecked(trafficEngine->isEngineDebugActive());
         this->engineDebug->setEnabled(true);
         connect(engineDebug,SIGNAL(toggled(bool)),trafficEngine,SLOT(setEngineDebug(bool)));

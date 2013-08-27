@@ -48,7 +48,7 @@ private:
     TrafficEngine *trafficEngine;
     
 public:
-    explicit SettingsWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    explicit SettingsWidget(QWidget* parent = nullptr, Qt::WindowFlags f = 0);
     /**
      * set to 0 to unbound the settings widget to the any trafficEngine
      **/ 

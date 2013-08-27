@@ -95,7 +95,7 @@ public slots:
     void step();
     void singleStep();
     void setSpeed(int speed);
-    void createAgent(int behaviorI = 0);
+    void createAgent(int behaviorI = nullptr);
     void createAgent(AgentBehavior* behavior);
     int addBehavior(AgentBehavior* behavior);
     void setEngineDebug(bool value);

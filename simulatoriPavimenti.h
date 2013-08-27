@@ -72,7 +72,7 @@ signals:
     void quitting();
 
 public:
-    SimulatoriPavimenti(QWidget *parent = 0);
+    SimulatoriPavimenti(QWidget *parent = nullptr);
     virtual ~SimulatoriPavimenti();
 
 private slots:

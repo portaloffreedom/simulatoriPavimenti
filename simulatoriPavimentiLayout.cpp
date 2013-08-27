@@ -74,7 +74,7 @@ void SimulatoriPavimenti::setLayouts()
 
 void SimulatoriPavimenti::setMapWidget(Map* map)
 {
-    if (this->map != 0)
+    if (this->map != nullptr)
 	mainVerticalLayout->removeWidget(this->map);
     //delete this->map; //questa delete è già eseguita dal traffic engine
     

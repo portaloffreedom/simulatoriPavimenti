@@ -19,8 +19,8 @@
 
 SimulatoriPavimenti::SimulatoriPavimenti(QWidget* parent) :
     QMainWindow(parent),
-    engine(0),
-    map(0)
+    engine(nullptr),
+    map(nullptr)
 {
     this->createWidgets();
     this->setLayouts();
