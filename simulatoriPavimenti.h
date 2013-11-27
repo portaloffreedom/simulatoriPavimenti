@@ -16,6 +16,8 @@
 #include "map/map.h"
 #include "engine/trafficengine.h"
 #include "engine/groundengine.h"
+#include "engine/logger.h"
+#include "engine/loggerstartwidget.h"
 #include "../service/simulatorePavimentiTypes.h"
 #include "../service/settingswidget.h"
 
@@ -36,6 +38,7 @@ private:
     QMenu *fileMenu;
     QAction *openAct;
     QAction *exitAct;
+    QAction *registerAct;
     
     QMenu* viewMenu;
     QAction* showLogDockAct;
@@ -63,6 +66,8 @@ private:
     QVBoxLayout* behaviourLayout;
     QPushButton* newBehaviourButton;
     QDockWidget* logDockWidget;
+    Logger* logger;
+    LoggerStartWidget* loggerStartWindow;
     
 
 protected:
@@ -77,8 +82,10 @@ public:
 
 private slots:
     void addNewBehaviour();
+    void startRegisterSensors(Logger* logger, smReal frequency, smReal timeDuration, bool graphicCheck);
     
 public slots:
+    void registerSensors();
     void open();
     void parsingFinished(Map*);
     void printError(QString,QString);

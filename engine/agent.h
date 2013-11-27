@@ -70,22 +70,22 @@ private:
 
 public:
     Agent(QString name, QString description, QString id, QPointF initialPos,
-	  TrafficEngine *trafficengine, AgentBehavior* behavior, QObject* parent = 0);
+          TrafficEngine *trafficengine, AgentBehavior* behavior, QObject* parent = 0);
     virtual ~Agent();
 
-    void draw(QPainter &painter);
-    void move(QPointF objetive, smReal time);
+    virtual void draw(QPainter &painter);
+    virtual void move(QPointF objetive, smReal time);
     /** Revert last movement made from "move" function */
     void revertMovement();
     /** Returns true if the agents collides */
     static bool collide(Agent* a, Agent *b);
     
     /** How far the next near objetive has to be set */
-    virtual smReal getMotionStep();
-    virtual bool collide(Agent* agent);
-    virtual smReal pathDistance(Agent* agent);
+    virtual smReal getMotionStep() const;
+    virtual bool collide(Agent* agent) const;
+    virtual smReal pathDistance(Agent* agent) const;
     
-    QPointF getPosition();
+    QPointF getPosition() const;
     smReal getOrientation();
     QPointF getOrientationV();
     #ifdef Agent_DEBUG

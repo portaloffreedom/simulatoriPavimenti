@@ -77,7 +77,7 @@ void GroundSensor::resetMatrix()
 /**
  * Returns the string rappresentation of the sensor Type
  */
-QString GroundSensor::getType()
+QString GroundSensor::getType() const
 {
     return this->type;
 }

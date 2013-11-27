@@ -368,7 +368,8 @@ bool MapReader::parseFigure(void (MapReader::*begin)(const QString description, 
 
     if (i==0) {
         // There should be at least one polygon or circle
-        emit error("Error parsing figure","There should be at least one polygon or circle. None found");
+        emit error("Error parsing figure","There should be at least "
+                   "one polygon or circle. None found");
         return false;
     }
     

@@ -1,4 +1,5 @@
 #include "simulatoriPavimenti.h"
+#include "engine/loggerstartwidget.h"
 #include <iostream>
 
 void SimulatoriPavimenti::createWidgets()
@@ -27,6 +28,10 @@ void SimulatoriPavimenti::createWidgets()
     setDockWidgets();
     
     this->settingswidget = new SettingsWidget(this);
+    
+    this->loggerStartWindow = new LoggerStartWidget();
+    connect(loggerStartWindow,SIGNAL(loggerStart(Logger*,smReal,smReal,bool)),
+                  this,SLOT(startRegisterSensors(Logger*,smReal,smReal,bool)));
 }
 
 void SimulatoriPavimenti::setDockWidgets()
@@ -42,7 +47,8 @@ void SimulatoriPavimenti::setDockWidgets()
     connect(newBehaviourButton,SIGNAL(clicked()),this,SLOT(addNewBehaviour()));
     
     behaviourLayout->addSpacerItem(
-	new QSpacerItem(0,0,QSizePolicy::Minimum,QSizePolicy::MinimumExpanding));
+        new QSpacerItem(0,0,QSizePolicy::Minimum,QSizePolicy::MinimumExpanding)
+    );
     
     // logDockWidget
     
@@ -75,7 +81,7 @@ void SimulatoriPavimenti::setLayouts()
 void SimulatoriPavimenti::setMapWidget(Map* map)
 {
     if (this->map != nullptr)
-	mainVerticalLayout->removeWidget(this->map);
+        mainVerticalLayout->removeWidget(this->map);
     //delete this->map; //questa delete è già eseguita dal traffic engine
     
     this->map = map;
@@ -88,6 +94,9 @@ void SimulatoriPavimenti::createActions()
     openAct = new QAction(tr("&Open..."), this);
     openAct->setShortcuts(QKeySequence::Open);
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+    
+    registerAct = new QAction(tr("&Register Sensor Output"),this);
+    connect(registerAct, SIGNAL(triggered()),this, SLOT(registerSensors()));
 
     exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
@@ -97,10 +106,13 @@ void SimulatoriPavimenti::createActions()
     showLogDockAct = new QAction(tr("&Log"),this);
     showLogDockAct->setCheckable(true);
     connect(showLogDockAct, SIGNAL(toggled(bool)),logDockWidget,SLOT(setShown(bool)));
+    connect(logDockWidget, SIGNAL(visibilityChanged(bool)), showLogDockAct, SLOT(setChecked(bool)));
 
     showBehaviourDockAct = new QAction(tr("&Behaviours"),this);
     showBehaviourDockAct->setCheckable(true);
     connect(showBehaviourDockAct, SIGNAL(toggled(bool)),behaviourDockWidget,SLOT(setShown(bool)));
+    connect(behaviourDockWidget, SIGNAL(visibilityChanged(bool)),showBehaviourDockAct,SLOT(setChecked(bool)));
+    behaviourDockWidget->setVisible(true);
 
 
     //Settings Menu
@@ -120,10 +132,11 @@ void SimulatoriPavimenti::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openAct);
+    fileMenu->addAction(registerAct);
     fileMenu->addAction(exitAct);
 
     viewMenu = menuBar()->addMenu(tr("&View"));
-    viewMenu->addAction(showLogDockAct);
+    //viewMenu->addAction(showLogDockAct); //never used, so it got removed. TODO reminder, use it.
     viewMenu->addAction(showBehaviourDockAct);
 
     settingsMenu = menuBar()->addMenu(tr("&Settings"));

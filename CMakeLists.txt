@@ -2,7 +2,7 @@ project(simulatoriPavimenti)
 cmake_minimum_required(VERSION 2.6)
 find_package(Qt4 REQUIRED)
 
-set (QT_USE_QTXML TRUE)
+SET (QT_USE_QTXML TRUE)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR CMAKE_COMPILER_IS_GNUCXX)
     include(CheckCXXCompilerFlag)

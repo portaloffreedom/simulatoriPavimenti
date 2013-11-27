@@ -22,6 +22,7 @@
 #include "behaviors/defaultbehavior.h"
 #include "behaviors/pathbehavior.h"
 #include "groundengine.h"
+#include "logger.h"
 #include "../service/randomservice.h"
 #include <iostream>
 #include <cmath>
@@ -60,7 +61,7 @@ void TrafficEngine::setEngineDebug(bool value)
     }
 }
 
-bool TrafficEngine::isEngineDebugActive()
+bool TrafficEngine::isEngineDebugActive() const
 {
     return this->ENGINE_DEBUG;
 }
@@ -86,7 +87,25 @@ void TrafficEngine::start()
     }
 }
 
-
+void TrafficEngine::startStepByStep(Logger* logger,smReal frequency, smReal timeDuration, bool graphicCheck)
+{
+    
+    //set the logger
+    QVector< GroundSensor* > sensorVector = map->getSensorMap();
+    for (int i = 0; i < sensorVector.size(); ++i) {
+        logger->addConfiguration(sensorVector.at(i));
+    }
+    
+    // start the calculation
+    const long int cicles = frequency*timeDuration;
+    const smReal frame_duration = 1/frequency;
+    for (int i=0; i<cicles; i++) {
+        this->singleStep(frame_duration,graphicCheck);
+        logger->writeSensorData();
+    }
+    
+    delete logger;
+}
 
 
 //TODO decisamente da migliorare con tanti parametri
@@ -126,6 +145,7 @@ void TrafficEngine::repaintGraphics(smReal time)
 
 void TrafficEngine::step()
 {
+    staticPassedTime = false;
     smReal passedTime = timer->getElapsedSecondsAndReset();
 
     this->controlPopulation(passedTime);
@@ -144,16 +164,19 @@ void TrafficEngine::step()
     if (lastFramesDuration.size() > 10)
         this->lastFramesDuration.pop_front();
     this->lastFramesDuration.append(passedTime);
+    lastFrameDuration = passedTime;
 }
 
-void TrafficEngine::singleStep()
-{
-    qWarning("attenzione questa azione ancora non funziona bene");
-    smReal passedTime = speed;
+void TrafficEngine::singleStep(smReal passedTime, bool graphicRepaint)
+{   
+    staticPassedTime = true;
+    lastFrameDuration = passedTime;
     
     this->controlPopulation(passedTime);
     this->updatePositions(passedTime);
-    this->repaintGraphics(passedTime);
+    this->updateSensors();
+    if (graphicRepaint)
+        this->repaintGraphics(passedTime);
 }
 
 
@@ -256,7 +279,7 @@ void TrafficEngine::controlCollisions()
 
 
 
-smReal TrafficEngine::getFps()
+smReal TrafficEngine::getFps() const
 {
     smReal value, sum=0;
     foreach(value, lastFramesDuration)
@@ -265,8 +288,12 @@ smReal TrafficEngine::getFps()
     return sum/lastFramesDuration.size();
 }
 
-smReal TrafficEngine::getFrameDuration()
+smReal TrafficEngine::getFrameDuration() const
 {
+    if (staticPassedTime) {
+        return lastFrameDuration;
+    }
+    
     smReal value, sum=0;
     foreach(value, lastFramesDuration)
         sum += value;

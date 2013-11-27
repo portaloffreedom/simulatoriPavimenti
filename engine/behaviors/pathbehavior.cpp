@@ -23,21 +23,28 @@
 #include <QLineF>
 #include <iostream>
 
-void PathBehavior::agentMove(Agent* agent, smReal time)
+void PathBehavior::agentMove(Agent* const agent, const smReal time)
 {    
     QPointF currentPos = agent->getPosition();
-    QPointF objective = agents[agent].objective;
+    QPointF objective = agents.value(agent).objective;
     QLineF distance = QLineF(currentPos,objective);
-    if (distance.length() < agent->getMotionStep()*tollerance*time) {
-	int pos = (agents[agent].position+1)%path.count();
-	AgentObjective objectiveInfo = getObjective(pos);
-	agents[agent] = objectiveInfo;
-	objective = objectiveInfo.objective;
-	//std::cout<<"distance("<<distance.length()<<") motionStep("<<agent->getMotionStep()<<")"<<std::endl;
+//     if (distance.length() < agent->getMotionStep()*tollerance*time) {
+    if (agentIsArrived(distance, agent, time)) {
+        int pos = (agents[agent].position+1)%path.count();
+        AgentObjective objectiveInfo = getObjective(pos);
+        agents[agent] = objectiveInfo;
+        objective = objectiveInfo.objective;
+        //std::cout<<"distance("<<distance.length()<<") motionStep("<<agent->getMotionStep()<<")"<<std::endl;
     }
     agent->move(objective,time);
 
 }
+
+bool PathBehavior::agentIsArrived(const QLineF& distance, Agent *const agent, const smReal time)
+{
+    return distance.length() < agent->getMotionStep()*time + tollerance;
+}
+
 
 void PathBehavior::addAgent(Agent* agent)
 {
@@ -64,7 +71,7 @@ void PathBehavior::remAgent(QObject* agent)
 //     delete agents[reinterpret_cast<Agent*>(agent)];
     agents.remove(reinterpret_cast<Agent*>(agent));
     std::cout<<"sender: "<<this->sender()<<
-	     "\nagent:  "<<agent<<std::endl;
+               "\nagent:  "<<agent<<std::endl;
 }
 
 
@@ -75,7 +82,7 @@ QWidget* PathBehavior::getBehaviourWidget()
 
 
 PathBehavior::PathBehavior(QObject* parent): AgentBehavior(parent),
-    tollerance(500)
+    tollerance(0.5)
 {
     widget = new PathBehaviorWidget();
     qreal STDnoise = +0.1;

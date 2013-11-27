@@ -80,14 +80,14 @@ void Agent::draw(QPainter &painter)
 #endif
 }
 
-smReal Agent::getMotionStep()
+smReal Agent::getMotionStep() const
 {
     smReal frame = trafficengine->getFrameDuration();
     return speed*frame;
     
 }
 
-QPointF Agent::getPosition()
+QPointF Agent::getPosition() const
 {
     return position;
 }
@@ -188,13 +188,13 @@ void Agent::move(QPointF objetive, smReal time)
     
 }
 
-smReal Agent::pathDistance(Agent* agent)
+smReal Agent::pathDistance(Agent* agent) const
 {
     return smMath::Distance(this->position,agent->position);
 }
     
 
-bool Agent::collide(Agent* agent)
+bool Agent::collide(Agent* agent) const
 {
     //QLineF distance(this->position,agent->position);
     smReal distance = this->pathDistance(agent);

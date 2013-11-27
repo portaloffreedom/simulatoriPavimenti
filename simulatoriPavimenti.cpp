@@ -2,6 +2,8 @@
 #include "map/mapreader.h"
 #include "engine/behaviors/pathbehavior.h"
 #include "engine/agentbehavior.h"
+#include "engine/logger.h"
+#include "engine/loggerstartwidget.h"
 
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
@@ -20,16 +22,21 @@
 SimulatoriPavimenti::SimulatoriPavimenti(QWidget* parent) :
     QMainWindow(parent),
     engine(nullptr),
-    map(nullptr)
+    map(nullptr),
+    logger(nullptr)
 {
     this->createWidgets();
     this->setLayouts();
     this->createActions();
     this->createMenus();
+    this->setWindowIcon(QIcon("icona_florimage1.ico"));
 }
 
 SimulatoriPavimenti::~SimulatoriPavimenti()
-{}
+{
+    delete this->loggerStartWindow;
+    delete this->logger;
+}
 
 void SimulatoriPavimenti::closeEvent(QCloseEvent* event)
 {
@@ -81,7 +88,8 @@ void SimulatoriPavimenti::parsingFinished(Map* map)
     this->centralWidget()->setVisible(true);
 
     connect(playButton,SIGNAL(pressed()),engine,SLOT(start()));
-    connect(stepButton,SIGNAL(pressed()),engine,SLOT(singleStep()));
+    //connect(stepButton,SIGNAL(pressed()),engine,SLOT(singleStep()));
+    stepButton->setVisible(false);
     connect(speedSlider,SIGNAL(valueChanged(int)),engine,SLOT(setSpeed(int)));
     connect(engine,SIGNAL(newBehaviour(QWidget*)),this,SLOT(newBehaviourAdded(QWidget*)));
 
@@ -103,6 +111,26 @@ void SimulatoriPavimenti::addNewBehaviour()
     //std::cout<<"added new behaviour"<<std::endl;
     //TODO crea il nuovo widget
     engine->addBehavior(new PathBehavior());
+}
+
+void SimulatoriPavimenti::registerSensors()
+{
+    if (this->map == nullptr) {
+        QMessageBox::warning(this, tr("ERROR"), tr("Register action is impossible"
+        " while a map is not loaded. Try \"file -> open\" to load a new map"));
+        return;
+    }
+    
+    loggerStartWindow->show();
+}
+
+void SimulatoriPavimenti::startRegisterSensors(Logger *logger,smReal frequency,smReal timeDuration,bool graphicCheck)
+{
+    loggerStartWindow->hide();
+    this->logger = logger;
+    this->engine->startStepByStep(logger,frequency,frequency,graphicCheck);
+    //TODO connect(something,SIGNAL(loggerFinished()),this,SLOT(stopRegisterSensors()));
+    
 }
 
 

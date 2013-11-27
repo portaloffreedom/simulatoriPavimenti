@@ -41,17 +41,18 @@ private:
     PathBehaviorWidget* widget;
 
     struct AgentObjective {
-	int position;
-	QPointF objective;
+        int position;
+        QPointF objective;
     };
 
     QMap<Agent*,AgentObjective> agents;
 
     //methods
     AgentObjective getObjective (int pos);
+    bool agentIsArrived(const QLineF &distance, Agent *const agent, const smReal time);
     
 public slots:
-    virtual void agentMove(Agent* agent, smReal time);
+    virtual void agentMove(Agent *const agent, const smReal time);
     virtual void addAgent(Agent* agent);
     void remAgent(QObject *agent);
     virtual QWidget* getBehaviourWidget();

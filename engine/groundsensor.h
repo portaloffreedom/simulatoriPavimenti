@@ -37,7 +37,25 @@ public:
 
     ~GroundSensor();
 
-    virtual QString getType();
+    virtual QString getType() const;
+    virtual smReal getCX() const {return cx;}
+    virtual smReal getCY() const {return cy;}
+    virtual smReal getAngle() const {return angle;}
+    virtual unsigned int getDim() const {return rows*cols;}
+    virtual QPointF realWorldSensorPos(int sensorNumber) const {
+        return realWorldPosition(reverseMatrixPosition(sensorNumber));
+    }
+    virtual smReal sensorStatus(int sensorNumber) const {
+        return matrix[sensorNumber];
+    }
+    
+//     virtual smReal getMarginUp() const;
+//     virtual smReal getMarginDown() const;
+//     virtual smReal getMarginLeft() const;
+//     virtual smReal getMarginRight() const;
+//     virtual smReal getPaddingX() const;
+//     virtual smReal getPaddingY() const;
+    
 
     virtual void hit(const QPointF& hitPoint, smReal weight = 1.0);
     virtual void hit(const QLineF& hitLine, smReal radius, smReal weight = 1.0) {
@@ -59,14 +77,14 @@ public:
             " padding("+QString::number(paddingX)+','+QString::number(paddingY)+')';
     }
     
-    void reset() { resetMatrix();};
+    void reset() { resetMatrix();}
 
 private:
     QString type;
     const smReal maxVal;
     const smReal minVal;
 
-    const int rows, cols;
+    const unsigned int rows, cols;
     smReal marginUp, marginDown;
     smReal marginLeft, marginRight;
     smReal paddingX, paddingY;
@@ -82,15 +100,19 @@ private:
 
     void hitSingle(int x, int y, const QPointF& hitPoint, smReal weight);
 
-    int matrixPosition(int x,int y) {
+    int matrixPosition(int x,int y) const {
         return x*rows+y;
     }
+    QPoint reverseMatrixPosition(int pos) const{
+        int x = pos / rows;
+        int y = pos - x;
+    }
     
-    QPointF realWorldPosition(const QPointF& p) {
+    QPointF realWorldPosition(const QPoint& p) const {
         return realWorldPosition(p.x(), p.y());
     }
     
-    QPointF realWorldPosition(int x, int y) {
+    QPointF realWorldPosition(int x, int y) const {
         QPointF p(
             realWorldPositionX(x),
             realWorldPositionY(y)
@@ -98,15 +120,15 @@ private:
         return p;
     }
     
-    smReal realWorldPositionY(int y) {
+    smReal realWorldPositionY(int y) const {
         return upperY+marginDown+(y*paddingY);
     }
     
-    smReal realWorldPositionX(int x) {
+    smReal realWorldPositionX(int x) const {
         return upperX+marginLeft+(x*paddingX);
     }
     
-    smReal scaleHit(smReal input) {
+    smReal scaleHit(smReal input) const {
         return input*(maxVal-minVal) + minVal;
     }
 };

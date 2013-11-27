@@ -37,6 +37,7 @@ public:
     virtual ~GroundEngine();
 
 private:
+    //TODO logger reference
     QVector<GroundSensor*> groundMap;
 
 public slots:

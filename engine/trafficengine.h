@@ -29,6 +29,7 @@
 #include "agentbehavior.h"
 #include "groundengine.h"
 #include "agent.h"
+#include "logger.h"
 #include "groundengine.h"
 #include "../service/timer.h"
 #include "../service/simulatorePavimentiTypes.h"
@@ -71,6 +72,8 @@ private:
     smReal totalFrameRenderTime;
     smReal updatePositionsTimer;
     smReal repaintGraphicsTimer;
+    bool staticPassedTime;
+    smReal lastFrameDuration;
 
     void controlPopulation(smReal time);
     void controlCollisions();
@@ -83,17 +86,18 @@ public:
     TrafficEngine(SettingsWidget* settingsWidget, Map* map, GroundEngine* groundEngine, smReal fps = std::numeric_limits<double>::infinity());
     virtual ~TrafficEngine();
 
-    smReal getFps();
-    smReal getFrameDuration();
-    bool isEngineDebugActive();
+    smReal getFps() const;
+    smReal getFrameDuration() const;
+    bool isEngineDebugActive() const;
 
 signals:
     void newBehaviour(QWidget* widgetBehaviour);
     
 public slots:
     void start();
+    void startStepByStep(Logger* logger, smReal frequency, smReal timeDuration, bool graphicCheck);
     void step();
-    void singleStep();
+    void singleStep(smReal passedTime, bool graphicRepaint);
     void setSpeed(int speed);
     void createAgent(int behaviorI = 0);
     void createAgent(AgentBehavior* behavior);
