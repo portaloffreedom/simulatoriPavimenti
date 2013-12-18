@@ -29,7 +29,6 @@ SimulatoriPavimenti::SimulatoriPavimenti(QWidget* parent) :
     this->setLayouts();
     this->createActions();
     this->createMenus();
-    this->setWindowIcon(QIcon("icona_florimage1.ico"));
 }
 
 SimulatoriPavimenti::~SimulatoriPavimenti()

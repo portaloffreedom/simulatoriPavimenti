@@ -18,31 +18,39 @@
  *
  */
 
-#ifndef GROUNDENGINE_H
-#define GROUNDENGINE_H
+#ifndef LOGGERSTARTWIDGET_H
+#define LOGGERSTARTWIDGET_H
 
-#include <QtCore>
-#include "groundsensor.h"
-#include "agent.h"
-#include "../map/map.h"
+#include <qt4/QtGui/QWidget>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QCheckBox>
+#include "logger.h"
 
-class Map;
-class Agent;
-
-class GroundEngine :  public QObject
+class LoggerStartWidget : public QWidget
 {
 Q_OBJECT
-public:
-    explicit GroundEngine( Map *parent = nullptr );
-    virtual ~GroundEngine();
 
 private:
-    QVector<GroundSensor*> groundMap;
-
-public slots:
-    void reset();
-    void updateGround(Agent* agent);
-
+    QLineEdit* savePath;
+    QSpinBox* frequency;
+    QSpinBox* timeDuration;
+    QCheckBox* graphicCheck;
+    
+public:
+    LoggerStartWidget(QWidget *parent = nullptr);
+    ~LoggerStartWidget();
+signals:
+    /** the logger is created in the heap, is set to the programmer to delete it */
+    void loggerStart(Logger*,smReal frequency,smReal timeDuration,bool graphicCheck);
+    
+private:
+    
+    void setupGraphics();
+    
+private slots:
+    void start();
+    void selectPath();
 };
 
-#endif // GROUNDENGINE_H
+#endif // LOGGERSTARTWIDGET_H

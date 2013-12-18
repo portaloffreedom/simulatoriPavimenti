@@ -1,11 +1,13 @@
 #include "simulatoriPavimenti.h"
 #include "engine/loggerstartwidget.h"
 #include <iostream>
+#include <QMessageBox>
 
 void SimulatoriPavimenti::createWidgets()
 {
     this->setCentralWidget(new QWidget(this));
     this->centralWidget()->setVisible(false);
+    reinterpret_cast<QApplication*>(QApplication::instance())->setWindowIcon(QIcon("icona_florimage1.ico"));
 
     timeSlider = new QSlider(this);
     timeSlider->setOrientation(Qt::Horizontal);
@@ -121,7 +123,7 @@ void SimulatoriPavimenti::createActions()
     connect(preferencesAct,SIGNAL(triggered()),settingswidget,SLOT(show()));
 
     aboutAct = new QAction(tr("&About"), this);
-    //TODO connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
     aboutQtAct = new QAction(tr("About &Qt"), this);
     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
@@ -151,4 +153,11 @@ void SimulatoriPavimenti::resetButtons()
 {
     playButton->setChecked(false);
     speedSlider->setValue(100);
+}
+
+void SimulatoriPavimenti::about()
+{
+    QMessageBox::about(this,
+                       tr("About SimulatoriPavimenti"),
+                       tr("This is a floor simulator"));
 }

@@ -94,7 +94,7 @@ void TrafficEngine::startStepByStep(Logger* logger,smReal frequency, smReal time
     QVector< GroundSensor* > sensorVector = map->getSensorMap();
     for (int i = 0; i < sensorVector.size(); ++i) {
         logger->addConfiguration(sensorVector.at(i));
-    }
+    }   
     
     // start the calculation
     const long int cicles = frequency*timeDuration;
@@ -113,9 +113,11 @@ void TrafficEngine::controlPopulation(smReal time)
 {
     uint totalPopulation = agentList.size();
     smReal population = 0;
+    
+    //if minor then 10 -> take the population number as precise
     if (this->population < 10)
         population = this->population;
-    else 
+    else //else randomize it a bit
         population = randomService.randomNormal(this->population,1);
     
     //If the population is enough, don't add anyone
@@ -123,13 +125,15 @@ void TrafficEngine::controlPopulation(smReal time)
     for (int i=1; i<populationToAdd; i++) {
         this->createAgent();
     }
+    
+    //TODO control population that has to die!
 }
 
 
 
 void TrafficEngine::updatePositions(smReal time)
 {
-    this->moveAgents(time*speed);
+    this->moveAgents(time);
 }
 
 
@@ -147,6 +151,7 @@ void TrafficEngine::step()
 {
     staticPassedTime = false;
     smReal passedTime = timer->getElapsedSecondsAndReset();
+    passedTime *= speed;
 
     this->controlPopulation(passedTime);
         smReal controlPopulationTimer = timer->getElapsedSeconds();

@@ -81,6 +81,7 @@ public:
     virtual ~SimulatoriPavimenti();
 
 private slots:
+    void about();
     void addNewBehaviour();
     void startRegisterSensors(Logger* logger, smReal frequency, smReal timeDuration, bool graphicCheck);
     

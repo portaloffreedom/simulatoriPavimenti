@@ -58,7 +58,7 @@ public slots:
     virtual QWidget* getBehaviourWidget();
 
 public:
-    PathBehavior(QObject* parent = 0);
+    PathBehavior(QObject* parent = nullptr);
     virtual ~PathBehavior();
 };
 
