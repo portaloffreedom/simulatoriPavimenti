@@ -92,7 +92,11 @@ smReal RandomService::randomReal()
  *
  * snippet from http://www.dreamincode.net/code/snippet1446.htm
  */
-
+// //TODO replace with c++11 normal distribution:
+// std::normal_distribution distribution; //normal(0,1) 
+// std::mt19937 engine; // Mersenne twister MT19937 
+// auto randn = std::bind(distribution, engine); 
+// engine.seed(time(0)); //Then use randn() to get a normal(0,1) distributed number
 /******************************************************************************/
 //	"Polar" version without trigonometric calls
 smReal RandomService::randn_notrig(smReal mu, smReal sigma) {
