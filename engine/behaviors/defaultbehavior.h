@@ -32,10 +32,13 @@ private:
     QList<Agent *> agentList;
 
 public:
-    DefaultBehavior(QObject* parent = 0);
+    DefaultBehavior(QObject* parent = nullptr);
     
     virtual void agentMove(Agent* agent, uint ms);
     virtual void addAgent(Agent* agent);
+    
+public slots:
+    virtual void remAgent(Agent*const agent);
 };
 
 #endif // DEFAULTBEHAVIOR_H

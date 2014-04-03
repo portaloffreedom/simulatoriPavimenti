@@ -39,3 +39,7 @@ void DefaultBehavior::addAgent(Agent* agent)
     this->agentList.append(agent);
 }
 
+void DefaultBehavior::remAgent(Agent*const agent)
+{
+    this->agentList.removeOne(agent);
+}
