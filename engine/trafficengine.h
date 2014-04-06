@@ -71,6 +71,7 @@ private:
     smReal controlPopulationTimer;
     smReal totalFrameRenderTime;
     smReal updatePositionsTimer;
+    smReal updateSensorsTimer;
     smReal repaintGraphicsTimer;
     bool staticPassedTime;
     smReal lastFrameDuration;
@@ -80,7 +81,7 @@ private:
     void solveCollision(Agent *a, Agent *b);
     void updatePositions(smReal time);
     void repaintGraphics(smReal time);
-    void updateSensors();
+    void updateSensors(smReal time);
 
 public:
     TrafficEngine(SettingsWidget* settingsWidget, Map* map, GroundEngine* groundEngine, smReal fps = std::numeric_limits<double>::infinity());

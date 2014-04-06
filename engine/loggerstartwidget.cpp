@@ -24,6 +24,7 @@
 #include <QFileDialog>
 #include <QFormLayout>
 #include <QMessageBox>
+// #include <iostream>
 
 const int timeDurationMax = 3600;
 const int frequencyMax = 100000;
@@ -83,5 +84,8 @@ void LoggerStartWidget::selectPath()
 void LoggerStartWidget::start()
 {    
     Logger *logger = new Logger(this->savePath->text());
+//     std::cout<<"#@2#_data_analysis; Frequency; Duration;"<<std::endl;
+//     std::cout<<"#@2#_data_analysis; "<<frequency->value()<<"; "<<timeDuration->value()<<std::endl;
+//     std::cout<<std::scientific;
     emit loggerStart(logger,frequency->value(),timeDuration->value(),graphicCheck->isChecked());
 }

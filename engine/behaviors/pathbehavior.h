@@ -24,6 +24,7 @@
 #include <QPoint>
 #include <QVector>
 #include <QMap>
+#include <QString>
 #include "pathbehaviorwidget.h"
 #include "../agent.h"
 #include "../agentbehavior.h"
@@ -34,19 +35,22 @@ class PathBehavior : public AgentBehavior
 Q_OBJECT
 
 private:
-    QVector<QPointF> path;
-    QVector<QPointF> noise;
-    
-    const smReal tollerance;
-    PathBehaviorWidget* widget;
-
     struct AgentObjective {
         int position;
         QPointF objective;
     };
 
+    QVector<QPointF> path;
+    QVector<QPointF> noise;
+    const qreal STDnoise;
+    
+    const smReal tollerance;
+    PathBehaviorWidget* widget;
+
     QMap<Agent*,AgentObjective> agents;
 
+    
+    
     //methods
     AgentObjective getObjective (int pos);
     bool agentIsArrived(const QLineF &distance, Agent *const agent, const smReal time);
@@ -54,8 +58,10 @@ private:
 public slots:
     virtual void agentMove(Agent *const agent, const smReal time);
     virtual void addAgent(Agent* agent);
-    void remAgent(QObject *agent);
+    
+    virtual void remAgent(Agent*const agent);
     virtual QWidget* getBehaviourWidget();
+    bool loadPathFromFile(const QString& file);
 
 public:
     PathBehavior(QObject* parent = nullptr);

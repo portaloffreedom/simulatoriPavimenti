@@ -127,7 +127,7 @@ void SimulatoriPavimenti::startRegisterSensors(Logger *logger,smReal frequency,s
 {
     loggerStartWindow->hide();
     this->logger = logger;
-    this->engine->startStepByStep(logger,frequency,frequency,graphicCheck);
+    this->engine->startStepByStep(logger,frequency,timeDuration,graphicCheck);
     //TODO connect(something,SIGNAL(loggerFinished()),this,SLOT(stopRegisterSensors()));
     
 }

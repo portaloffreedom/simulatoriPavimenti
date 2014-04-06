@@ -21,6 +21,7 @@
 #include "pathbehavior.h"
 #include "../service/randomservice.h"
 #include <QLineF>
+#include <QFileDialog>
 #include <iostream>
 
 void PathBehavior::agentMove(Agent* const agent, const smReal time)
@@ -66,12 +67,9 @@ PathBehavior::AgentObjective PathBehavior::getObjective(int pos)
 }
 
 
-void PathBehavior::remAgent(QObject* agent)
+void PathBehavior::remAgent(Agent*const agent)
 {
-//     delete agents[reinterpret_cast<Agent*>(agent)];
     agents.remove(reinterpret_cast<Agent*>(agent));
-    std::cout<<"sender: "<<this->sender()<<
-               "\nagent:  "<<agent<<std::endl;
 }
 
 
@@ -80,41 +78,38 @@ QWidget* PathBehavior::getBehaviourWidget()
     return widget;
 }
 
+bool PathBehavior::loadPathFromFile(const QString& file)
+{
+    QFile _file(file);
+    if (!_file.open(QIODevice::ReadOnly))
+        return false;
+    QTextStream fileStream(&_file);
+    float x,y;
+    
+    while (!fileStream.atEnd()) {
+        //TODO check file correctness
+        fileStream>>x>>y;
+        path.append (QPointF(x,y));
+        noise.append(QPointF(STDnoise,STDnoise));
+    }
+    
+    return true;
+}
+
 
 PathBehavior::PathBehavior(QObject* parent): AgentBehavior(parent),
-    tollerance(0.5)
+    tollerance(0.5),
+    STDnoise(0.1)
 {
     widget = new PathBehaviorWidget();
-    qreal STDnoise = +0.1;
     
-    //questo è un path unico provvisorio
-    //TODO chiedere all'utente un path
-    path.append(QPointF( +2.0, +2.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( +2.0, +5.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( +1.0, +6.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( +0.0, +7.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( -3.0, +8.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( -5.0, +6.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( -5.0, -6.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( -4.0, -7.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( -3.0, -7.5 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( -2.0, -6.5 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( -1.0, -4.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( -0.5, -2.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
-    path.append(QPointF( +0.0, +0.0 ));
-    noise.append(QPointF( STDnoise, STDnoise ));
+    QFileDialog dialog(widget);
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    bool ok = false;
+    do
+        if (dialog.exec())
+            ok = loadPathFromFile(dialog.selectedFiles().first());
+    while (!ok);
 
 }
 

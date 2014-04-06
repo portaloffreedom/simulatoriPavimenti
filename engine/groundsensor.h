@@ -77,7 +77,7 @@ public:
             " padding("+QString::number(paddingX)+','+QString::number(paddingY)+')';
     }
     
-    void reset() { resetMatrix();}
+    virtual void reset() { resetMatrix();}
 
 private:
     QString type;

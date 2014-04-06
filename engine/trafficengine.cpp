@@ -24,7 +24,6 @@
 #include "groundengine.h"
 #include "logger.h"
 #include "../service/randomservice.h"
-#include <iostream>
 #include <cmath>
 
 #define E_DBG(A) {if (ENGINE_DEBUG) {A;}}
@@ -35,7 +34,7 @@ TrafficEngine::TrafficEngine(SettingsWidget* settingsWidget, Map* map, GroundEng
     speed(1.0),
     ENGINE_DEBUG(false),
     settingsWidget(settingsWidget),
-    population(5)
+    population(4)
 {
     this->qtimer = new QTimer(this);
     this->timer = new Timer(this);
@@ -122,7 +121,7 @@ void TrafficEngine::controlPopulation(smReal time)
     
     //If the population is enough, don't add anyone
     smReal populationToAdd = (population - totalPopulation);
-    for (int i=1; i<populationToAdd; i++) {
+    for (int i=0; i<populationToAdd; i++) {
         this->createAgent();
     }
     
@@ -149,37 +148,56 @@ void TrafficEngine::repaintGraphics(smReal time)
 
 void TrafficEngine::step()
 {
+//     std::cout<<"#@1#_data_analysis; "<<std::scientific;
+//     std::string separator = "; ";
+    smRealD timebefore = 0;
     staticPassedTime = false;
-    smReal passedTime = timer->getElapsedSecondsAndReset();
+    
+    smRealD passedTime = timer->getElapsedSecondsAndReset();
     passedTime *= speed;
-
+    
     this->controlPopulation(passedTime);
-        smReal controlPopulationTimer = timer->getElapsedSeconds();
+        smRealD controlPopulationTimer = timer->getElapsedSeconds();
+//         std::cout<<controlPopulationTimer<<separator;///////////////////////////
+        timebefore += controlPopulationTimer;
     this->updatePositions(passedTime);
-        smReal updatePositionsTimer = timer->getElapsedSeconds() - controlPopulationTimer;
-    this->updateSensors();
-        smReal updateSensorsTimer = timer->getElapsedSeconds() - updatePositionsTimer;
+        smRealD updatePositionsTimer = timer->getElapsedSeconds() - timebefore;
+//         std::cout<<updatePositionsTimer<<separator;/////////////////////////////
+        timebefore += updatePositionsTimer;
+    this->updateSensors(passedTime);
+        smRealD updateSensorsTimer = timer->getElapsedSeconds() - timebefore;
+//         std::cout<<updateSensorsTimer<<separator;///////////////////////////////
+        timebefore += updateSensorsTimer;
         
     this->repaintGraphics(passedTime);
+        totalFrameRenderTime = timer->getElapsedSeconds();
+        repaintGraphicsTimer = totalFrameRenderTime - timebefore;
+//         std::cout<<repaintGraphicsTimer<<separator;/////////////////////////////
+//         std::cout<<totalFrameRenderTime;////////////////////////////////////////
+        
         this->controlPopulationTimer = controlPopulationTimer;
         this->updatePositionsTimer = updatePositionsTimer;
-        totalFrameRenderTime = timer->getElapsedSeconds();
-        repaintGraphicsTimer = totalFrameRenderTime - this->updatePositionsTimer;
+        this->updateSensorsTimer = updateSensorsTimer;
     
     if (lastFramesDuration.size() > 10)
         this->lastFramesDuration.pop_front();
-    this->lastFramesDuration.append(passedTime);
-    lastFrameDuration = passedTime;
+    this->lastFramesDuration.append(totalFrameRenderTime);
+    lastFrameDuration = totalFrameRenderTime;
+    
+//     std::cout<<std::endl;
+   
 }
 
 void TrafficEngine::singleStep(smReal passedTime, bool graphicRepaint)
 {   
     staticPassedTime = true;
     lastFrameDuration = passedTime;
+//     std::cout<<"#@2#_data_analysis; ";
+//     std::cout<<timer->getElapsedSecondsAndReset()<<std::endl;
     
     this->controlPopulation(passedTime);
     this->updatePositions(passedTime);
-    this->updateSensors();
+    this->updateSensors(passedTime);
     if (graphicRepaint)
         this->repaintGraphics(passedTime);
 }
@@ -334,7 +352,7 @@ void TrafficEngine::solveCollision(Agent* a, Agent* b)
     b->revertMovement();
 }
 
-void TrafficEngine::updateSensors()
+void TrafficEngine::updateSensors(smReal time)
 {
     groundEngine->reset();
     foreach(Agent *agent, agentList) {
